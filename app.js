@@ -6,6 +6,7 @@ import router from "./router.js"
 import config from "./config.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js"
 import log from "./logging/logging.js";
+import {setupLoggingPathUpdate} from "./cron/loggingPathUpdate.js";
 
 const app = express()
 
@@ -23,6 +24,7 @@ const appStart = async () => {
     } catch (e) {
         log.error("Ошибка при запуске ksu-helper" + e)
     }
+    await setupLoggingPathUpdate()
 }
 
 appStart().then(() => log.info(`App has been ran! http://localhost:${config.PORT}`));
