@@ -103,9 +103,9 @@ class TeacherScheduleService {
             const groups = []
             for (let j = 1; j< tableData[i].length;j++){
                 const time = tableData[0][j]
-                const group =  tableData[i][j]
+                let group =  tableData[i][j]
                 if (group === '-'){
-                    continue
+                    group = ""
                 }
                 groups.push({
                     time, group
