@@ -47,7 +47,6 @@ class BrowserController{
         } catch (e) {
             throw new Error(e)
         }
-
     }
 
     async auth() {
