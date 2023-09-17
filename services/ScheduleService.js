@@ -161,7 +161,7 @@ class ScheduleService {
 
             let schedule = []
             let item_number = 0
-
+            console.log(schedule_data)
             for (let i = 0; i < 6; i++) {
                 let daily_subjects = []
                 let day = ''
@@ -178,14 +178,14 @@ class ScheduleService {
                         };
                     }
                     const values = Object.values(item);
-                    if (values[2] !== "&nbsp;") {
-
-
-                        daily_subjects.push({
-                            time: values[1],
-                            subject: removeBrTags(values[2])
-                        })
+                    if (values[2] === "&nbsp;") {
+                        values[2] = ""
                     }
+                    daily_subjects.push({
+                        time: values[1],
+                        subject: removeBrTags(values[2])
+                    })
+
                     item_number += 1
                 }
                 let daily_schedule = {
