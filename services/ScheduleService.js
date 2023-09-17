@@ -161,7 +161,6 @@ class ScheduleService {
 
             let schedule = []
             let item_number = 0
-            console.log(schedule_data)
             for (let i = 0; i < 6; i++) {
                 let daily_subjects = []
                 let day = ''
