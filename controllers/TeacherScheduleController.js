@@ -43,7 +43,7 @@ class TeacherScheduleController {
             }
 
             if (id in this.schedule_cache && Date.now() - this.schedule_cache[id].timestamp <= 30 * 1000) {
-                return res.json(this.schedule_cache[id])
+                return res.json(this.schedule_cache[id].schedule)
             }
 
             const schedule = await TeacherScheduleService.get_teacher_schedule(id)

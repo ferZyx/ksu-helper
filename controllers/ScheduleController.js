@@ -66,7 +66,7 @@ class ScheduleController {
             const cacheName = id + language
 
             if (cacheName in this.schedule_cache && Date.now() - this.schedule_cache[cacheName].timestamp <= 30 * 1000) {
-                return res.json(this.schedule_cache[cacheName])
+                return res.json(this.schedule_cache[cacheName].schedule)
             }
 
             const schedule = await ScheduleService.get_schedule_by_groupId(BrowserController.browser, BrowserController.auth_cookie.cookie, id, language)
