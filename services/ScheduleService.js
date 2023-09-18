@@ -28,6 +28,7 @@ class ScheduleService {
             await page.select('select[name="Login"]', webFacultyList[0]);
             await page.click('input[type="submit"]')
 
+            await page.waitForTimeout(500)
             await page.waitForSelector("header")
             const cookies = await page.cookies()
             const auth_cookie = await cookies.find(cookie => cookie.name === "PHPSESSID");
