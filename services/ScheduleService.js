@@ -120,7 +120,7 @@ class ScheduleService {
 
     }
 
-    get_schedule_by_groupId = async (browser, auth_cookie, id, language) => {
+    get_schedule_by_groupId = async (browser, auth_cookie, id, language, attemption = 0) => {
         function removeBrTags(text) {
             if (text.includes('<br>')) {
                 return removeBrTags(text.replace('<br>', '\n'));
@@ -133,7 +133,7 @@ class ScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
 
-            await page.waitForSelector("table")
+            await page.waitForSelector("table", {timeout:2000})
 
             const tableHTML = await page.evaluate((selector) => {
                 const table = document.querySelector(selector);
@@ -195,10 +195,15 @@ class ScheduleService {
             }
             return schedule
         } catch (e) {
-            const path = `logs/error_${Date.now()}.png`
-            await page.screenshot({path, fullPage: true});
-            await page.close()
-            throw new Error("Ошибка при получении расписания. Ошибку заскринил." + e.message)
+            if (attemption < 2){
+                await page.close().catch(e => console.log(e))
+                await this.get_schedule_by_groupId(browser, auth_cookie, id, language, ++attemption)
+            }else{
+                const path = `logs/error_${Date.now()}.png`
+                await page.screenshot({path, fullPage: true});
+                await page.close().catch(e => console.log(e))
+                throw new Error("Ошибка при получении студенческого расписания. Ошибку заскринил." + e.message)
+            }
         }
     }
 }

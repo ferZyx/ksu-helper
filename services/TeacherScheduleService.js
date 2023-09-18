@@ -68,7 +68,7 @@ class TeacherScheduleService {
             const name = await (await link.getProperty('textContent')).jsonValue();
             const href = await (await link.getProperty('href')).jsonValue();
             const id = await getQueryParam(href, 'IdPrep')
-            if (name === '- '){
+            if (name === '- ') {
                 continue
             }
             linkObjects.push({name, href, id, departmentId})
@@ -79,43 +79,55 @@ class TeacherScheduleService {
         return linkObjects
     }
 
-    async get_teacher_schedule(id) {
+    async get_teacher_schedule(id, attemption = 0) {
         const page = await BrowserController.browser.newPage()
-        await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
+        try {
+            await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
 
-        const tr_list_selector = 'table tr'
+            const tr_list_selector = 'table tr'
 
-        await page.waitForSelector(tr_list_selector)
+            await page.waitForSelector(tr_list_selector)
 
-        const tableHTML = await page.evaluate((selector) => {
-            const table = document.querySelector(selector);
-            return table ? table.outerHTML : null;
-        }, "table");
+            const tableHTML = await page.evaluate((selector) => {
+                const table = document.querySelector(selector);
+                return table ? table.outerHTML : null;
+            }, "table");
 
-        await page.close()
+            await page.close()
 
-        const tableData = HtmlService.htmlTableToJson(tableHTML)
+            const tableData = HtmlService.htmlTableToJson(tableHTML)
 
-        const schedule = []
-        for (let i = 1; i< tableData.length;i++){
-            const dailySchedule = {}
-            dailySchedule['day'] = tableData[i][0]
-            const groups = []
-            for (let j = 1; j< tableData[i].length;j++){
-                const time = tableData[0][j]
-                let group =  tableData[i][j]
-                if (group === '-'){
-                    group = ""
+            const schedule = []
+            for (let i = 1; i < tableData.length; i++) {
+                const dailySchedule = {}
+                dailySchedule['day'] = tableData[i][0]
+                const groups = []
+                for (let j = 1; j < tableData[i].length; j++) {
+                    const time = tableData[0][j]
+                    let group = tableData[i][j]
+                    if (group === '-') {
+                        group = ""
+                    }
+                    groups.push({
+                        time, group
+                    })
                 }
-                groups.push({
-                    time, group
-                })
+                dailySchedule['groups'] = groups
+                schedule.push(dailySchedule)
             }
-            dailySchedule['groups'] = groups
-            schedule.push(dailySchedule)
-        }
 
-        return schedule
+            return schedule
+        } catch (e) {
+            if (attemption < 2) {
+                await page.close().catch(e => console.log(e))
+                await this.get_teacher_schedule(id, ++attemption)
+            } else {
+                const path = `logs/error_${Date.now()}.png`
+                await page.screenshot({path, fullPage: true});
+                await page.close().catch(e => console.log(e))
+                throw new Error("Ошибка при получении преподского расписания. Ошибку заскринил." + e.message)
+            }
+        }
     }
 }
 
