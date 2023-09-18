@@ -36,7 +36,7 @@ class BrowserController{
     async launchBrowser() {
         try {
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({headless: false})
+                this.browser = await puppeteer.launch({headless: "new",  args: [`--no-sandbox`, `--headless`, `--disable-gpu`, `--disable-dev-shm-usage`],})
             } else {
                 this.browser = await puppeteer.launch({
                     headless: true,
