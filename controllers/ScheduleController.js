@@ -8,6 +8,12 @@ async function delay(ms) {
 }
 
 class ScheduleController {
+    schedule_cache;
+
+    constructor() {
+        this.schedule_cache = {}
+    }
+
     get_faculty_list = async (req, res, next) => {
         try {
             return res.json(BrowserController.faculties_data)
@@ -57,16 +63,21 @@ class ScheduleController {
             if (isNaN(id) || !language) {
                 return next(ApiError.BadRequest("Указан некорректный параметр id или language"))
             }
-            if ((Date.now - BrowserController.auth_cookie.time) / 1000 > 45 * 60) {
-                await BrowserController.auth()
+            const cacheName = id + language
+
+            if (cacheName in this.schedule_cache && Date.now() - this.schedule_cache[cacheName].timestamp <= 30 * 1000) {
+                return res.json(this.schedule_cache[cacheName])
             }
+
             const schedule = await ScheduleService.get_schedule_by_groupId(BrowserController.browser, BrowserController.auth_cookie.cookie, id, language)
 
-            return res.json(schedule)
+            this.schedule_cache[cacheName] = {schedule, timestamp: Date.now()}
 
+            return res.json(schedule)
         } catch (e) {
-            log.error("Ошибка при получении расписания: " + e.message, {stack:e.stack})
-            next(e)
+            log.error("Ошибка при получении student расписания: " + e.message + "\n\n На всякий случай запустил функцию authIfNot!", {stack: e.stack})
+            await BrowserController.authIfNot()
+                .finally(() => next(e))
         }
     }
 

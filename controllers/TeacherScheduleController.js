@@ -1,8 +1,15 @@
 import TeacherScheduleService from "../services/TeacherScheduleService.js";
 import log from "../logging/logging.js";
 import ApiError from "../exceptions/apiError.js";
+import BrowserController from "./BrowserController.js";
 
 class TeacherScheduleController {
+    schedule_cache;
+
+    constructor() {
+        this.schedule_cache = {}
+    }
+
     async get_departments_list(req, res, next) {
         try {
             const departments = await TeacherScheduleService.get_departments_list()
@@ -28,18 +35,26 @@ class TeacherScheduleController {
         }
     }
 
-    async get_teacher_schedule(req, res, next) {
+    get_teacher_schedule = async (req, res, next) => {
         try {
             const id = req.params.id
             if (isNaN(id)) {
                 return next(ApiError.BadRequest("Указан некорректный параметр id преподавателя"))
             }
 
+            if (id in this.schedule_cache && Date.now() - this.schedule_cache[id].timestamp <= 30 * 1000) {
+                return res.json(this.schedule_cache[id])
+            }
+
             const schedule = await TeacherScheduleService.get_teacher_schedule(id)
+
+            this.schedule_cache[id] = {schedule, timestamp: Date.now()}
+
             return res.json(schedule)
         } catch (e) {
-            log.error("Ошибка при попытке получить расписание препода" + e.message, {stack: e.stack})
-            next(e)
+            log.error("Ошибка при получении teacher расписания: " + e.message + "\n\n На всякий случай запустил функцию authIfNot!", {stack: e.stack})
+            await BrowserController.authIfNot()
+                .finally(() => next(e))
         }
     }
 

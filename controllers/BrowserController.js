@@ -23,9 +23,6 @@ class BrowserController{
             if (!await this.isKsuAlive()) {
                 return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
             }
-            if (!await this.isAuthed()) {
-                await this.auth();
-            }
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -44,6 +41,7 @@ class BrowserController{
                     executablePath: '/usr/bin/google-chrome-stable'
                 })
             }
+            await this.auth()
         } catch (e) {
             throw new Error(e)
         }
@@ -58,10 +56,9 @@ class BrowserController{
         } catch (e) {
             throw new Error(e)
         }
-
     }
 
-    async isAuthed() {
+    async authIfNot() {
         const page = await this.browser.newPage();
         try {
             await page.goto("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read")
@@ -72,10 +69,12 @@ class BrowserController{
             });
             await page.close()
 
-            return elementExists
+            if (!elementExists){
+                await this.auth()
+            }
         } catch (e) {
             await page.close()
-            throw new Error(e)
+            log.error("Ошибка при попытке проверить авторизован или нет. " + e.message, {stack:e.stack})
         }
 
     }
