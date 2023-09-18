@@ -36,12 +36,12 @@ class BrowserController{
     async launchBrowser() {
         try {
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({headless: "new",  args: [`--no-sandbox`, `--headless`, `--disable-gpu`, `--disable-dev-shm-usage`],})
+                this.browser = await puppeteer.launch({headless: false})
             } else {
                 this.browser = await puppeteer.launch({
-                    headless: true,
+                    headless: "new",
                     args: ["--no-sandbox"],
-                    executablePath: '/usr/bin/chromium-browser'
+                    executablePath: '/usr/bin/google-chrome-stable'
                 })
             }
         } catch (e) {
@@ -54,7 +54,7 @@ class BrowserController{
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
             this.faculties_data = faculties_data
             this.auth_cookie = {cookie: auth_cookie, time:Date.now()}
-            log.warn("(Варн временный) Произведена авторизация/получен список факультетов на schedule.ksu.kz")
+            log.info("Произведена авторизация/получен список факультетов на schedule.ksu.kz")
         } catch (e) {
             throw new Error(e)
         }
