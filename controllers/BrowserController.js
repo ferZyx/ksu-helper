@@ -20,9 +20,9 @@ class BrowserController{
             if (!this.browser.isConnected()) {
                 await this.launchBrowser();
             }
-            // if (!await this.isKsuAlive()) {
-            //     return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
-            // }
+            if (!await this.isKsuAlive()) {
+                return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
+            }
             if (!await this.isAuthed()) {
                 await this.auth();
             }
