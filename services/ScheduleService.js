@@ -1,6 +1,7 @@
 import log from "../logging/logging.js";
 import HtmlService from "./HtmlService.js";
 import config from "../config.js";
+import BrowserController from "../controllers/BrowserController.js";
 
 class ScheduleService {
 
@@ -133,7 +134,7 @@ class ScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
 
-            await page.waitForSelector("table", {timeout:2000})
+            await page.waitForSelector("table", {timeout: 2000})
 
             const tableHTML = await page.evaluate((selector) => {
                 const table = document.querySelector(selector);
@@ -195,10 +196,11 @@ class ScheduleService {
             }
             return schedule
         } catch (e) {
-            if (attemption < 2){
+            if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
-                await this.get_schedule_by_groupId(browser, auth_cookie, id, language, ++attemption)
-            }else{
+                await BrowserController.authIfNot()
+                    .finally(async () => await this.get_schedule_by_groupId(browser, auth_cookie, id, language, ++attemption))
+            } else {
                 const path = `logs/error_${Date.now()}.png`
                 await page.screenshot({path, fullPage: true});
                 await page.close().catch(e => console.log(e))

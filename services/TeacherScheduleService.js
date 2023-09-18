@@ -120,7 +120,9 @@ class TeacherScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
-                await this.get_teacher_schedule(id, ++attemption)
+                await BrowserController.authIfNot()
+                    .finally(async () => await this.get_teacher_schedule(id, ++attemption))
+
             } else {
                 const path = `logs/error_${Date.now()}.png`
                 await page.screenshot({path, fullPage: true});
