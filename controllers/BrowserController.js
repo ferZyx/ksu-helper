@@ -41,7 +41,7 @@ class BrowserController{
                 this.browser = await puppeteer.launch({
                     headless: "new",
                     args: ["--no-sandbox"],
-                    executablePath: '/usr/bin/google-chrome-stable'
+                    executablePath: '/root/.cache/puppeteer/chrome/linux-115.0.5790.170/chrome-linux64/chrome'
                 })
             }
         } catch (e) {
