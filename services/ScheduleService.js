@@ -200,10 +200,7 @@ class ScheduleService {
             await page.close()
             throw new Error("Ошибка при получении расписания. Ошибку заскринил." + e.message)
         }
-
     }
-
-
 }
 
 export default new ScheduleService()

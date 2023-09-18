@@ -7,6 +7,7 @@ import config from "./config.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js"
 import log from "./logging/logging.js";
 import {setupLoggingPathUpdate} from "./cron/loggingPathUpdate.js";
+import {setupKsuReAuth} from "./cron/ksuReAuth.js";
 
 const app = express()
 
@@ -25,6 +26,7 @@ const appStart = async () => {
         log.error("Ошибка при запуске ksu-helper" + e)
     }
     await setupLoggingPathUpdate()
+    await setupKsuReAuth()
 }
 
 appStart().then(() => log.info(`App has been ran! http://localhost:${config.PORT}`));

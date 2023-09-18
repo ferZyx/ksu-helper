@@ -39,7 +39,7 @@ class BrowserController{
                 this.browser = await puppeteer.launch({headless: false})
             } else {
                 this.browser = await puppeteer.launch({
-                    headless: true,
+                    headless: "new",
                     args: ["--no-sandbox"],
                     executablePath: '/usr/bin/google-chrome-stable'
                 })
