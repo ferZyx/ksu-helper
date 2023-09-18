@@ -69,7 +69,7 @@ class ScheduleController {
                 return res.json(this.schedule_cache[cacheName].schedule)
             }
 
-            const schedule = await ScheduleService.get_schedule_by_groupId(BrowserController.browser, BrowserController.auth_cookie.cookie, id, language)
+            const schedule = await ScheduleService.get_schedule_by_groupId(id, language)
 
             this.schedule_cache[cacheName] = {schedule, timestamp: Date.now()}
 

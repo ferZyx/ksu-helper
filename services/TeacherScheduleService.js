@@ -84,6 +84,18 @@ class TeacherScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
 
+            await page.waitForSelector("body", {timeout: 2000})
+            const tableExists = await page.evaluate(() => {
+                return !!document.querySelector('table');
+            });
+
+            if (!tableExists){
+                await page.close()
+                await BrowserController.auth()
+                return await this.get_teacher_schedule(id, attemption)
+            }
+
+
             const tr_list_selector = 'table tr'
 
             await page.waitForSelector(tr_list_selector)
@@ -120,9 +132,7 @@ class TeacherScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
-                await BrowserController.authIfNot()
-                    .finally(async () => await this.get_teacher_schedule(id, ++attemption))
-
+                return await this.get_teacher_schedule(id, ++attemption)
             } else {
                 const path = `logs/error_${Date.now()}.png`
                 await page.screenshot({path, fullPage: true});

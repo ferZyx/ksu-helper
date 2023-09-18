@@ -121,7 +121,7 @@ class ScheduleService {
 
     }
 
-    get_schedule_by_groupId = async (browser, auth_cookie, id, language, attemption = 0) => {
+    get_schedule_by_groupId = async (id, language, attemption = 0) => {
         function removeBrTags(text) {
             if (text.includes('<br>')) {
                 return removeBrTags(text.replace('<br>', '\n'));
@@ -130,9 +130,20 @@ class ScheduleService {
             }
         }
 
-        const page = await browser.newPage();
+        const page = await BrowserController.browser.newPage();
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
+
+            await page.waitForSelector("body", {timeout: 2000})
+            const tableExists = await page.evaluate(() => {
+                return !!document.querySelector('table');
+            });
+
+            if (!tableExists){
+                await page.close()
+                await BrowserController.auth()
+                return await this.get_schedule_by_groupId(id, language, attemption)
+            }
 
             await page.waitForSelector("table", {timeout: 2000})
 
@@ -198,8 +209,7 @@ class ScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
-                await BrowserController.authIfNot()
-                    .finally(async () => await this.get_schedule_by_groupId(browser, auth_cookie, id, language, ++attemption))
+                return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {
                 const path = `logs/error_${Date.now()}.png`
                 await page.screenshot({path, fullPage: true});
