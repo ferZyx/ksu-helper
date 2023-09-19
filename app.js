@@ -14,6 +14,11 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors())
+app.use((req, res, next) => {
+    const decodedUrl = decodeURIComponent(req.url);
+    log.info(`${req.method} ${decodedUrl}`);
+    next();
+});
 app.use(router)
 app.use(errorMiddleware)
 
