@@ -84,7 +84,7 @@ class TeacherScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
 
-            await page.waitForSelector("header", {timeout: 2000})
+            await page.waitForSelector("body", {timeout: 2000})
             const tableExists = await page.evaluate(() => {
                 return !!document.querySelector('table');
             });
