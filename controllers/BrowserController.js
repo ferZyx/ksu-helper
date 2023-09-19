@@ -33,7 +33,7 @@ class BrowserController{
     async launchBrowser() {
         try {
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({headless: false})
+                this.browser = await puppeteer.launch({headless: false, args: ['--window-size=900,800','--window-position=-10,0']})
             } else {
                 this.browser = await puppeteer.launch({
                     headless: "new",
@@ -44,6 +44,15 @@ class BrowserController{
             await this.auth()
         } catch (e) {
             throw new Error(e)
+        }
+    }
+
+    async restartBrowser(){
+        try{
+            await this.browser.close()
+            await this.launchBrowser()
+        }catch (e) {
+            throw e
         }
     }
 

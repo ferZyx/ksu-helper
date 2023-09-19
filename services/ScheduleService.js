@@ -8,10 +8,9 @@ class ScheduleService {
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
         try {
-
             await page.goto('https://schedule.ksu.kz/login.php');
             // Дождемся, когда загрузится содержимое сайта
-            await page.waitForSelector('input');
+            await page.waitForSelector('input', {timeout:10 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
@@ -43,7 +42,6 @@ class ScheduleService {
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
         }
-
     }
 
     get_program_list_by_facultyId = async (browser, faculties_data, id) => {
@@ -134,24 +132,33 @@ class ScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
 
-            await page.waitForSelector("header", {timeout: 2000})
-            const tableExists = await page.evaluate(() => {
-                return !!document.querySelector('table');
+            await page.waitForSelector("body", {timeout: 2000})
+
+            const isForbidden = await page.evaluate(() => {
+                const h1 = document.querySelector(`h1`);
+                return h1 ? h1.textContent.includes("Forbidden") : false
             });
 
-            if (!tableExists){
-                await page.close()
-                await BrowserController.auth()
-                return await this.get_schedule_by_groupId(id, language, attemption)
+            if (isForbidden){
+                log.warn("(варн временный) Нас забанило, перезапускаю браузер!")
+                await BrowserController.restartBrowser()
+                return await this.get_schedule_by_groupId(id, language, ++attemption)
             }
 
-            await page.waitForSelector("table", {timeout: 2000})
+            const isTableNotExists = await page.evaluate(() => {
+                return !document.querySelector('table');
+            });
+
+            if (isTableNotExists){
+                await page.close()
+                await BrowserController.auth()
+                return await this.get_schedule_by_groupId(id, language, ++attemption)
+            }
 
             const tableHTML = await page.evaluate((selector) => {
                 const table = document.querySelector(selector);
                 return table ? table.outerHTML : null;
             }, "table");
-            log.info(tableHTML)
 
             await page.close()
 
@@ -205,9 +212,10 @@ class ScheduleService {
                 }
                 schedule.push(daily_schedule)
             }
+
             return schedule
         } catch (e) {
-            if (attemption < 2) {
+            if (attemption < 3) {
                 await page.close().catch(e => console.log(e))
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {

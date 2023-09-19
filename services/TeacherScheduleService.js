@@ -1,6 +1,7 @@
 import BrowserController from "../controllers/BrowserController.js";
 import ApiError from "../exceptions/apiError.js";
 import HtmlService from "./HtmlService.js";
+import log from "../logging/logging.js";
 
 function getQueryParam(url, paramName) {
     const urlParts = url.split('?');
@@ -85,20 +86,28 @@ class TeacherScheduleService {
             await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
 
             await page.waitForSelector("body", {timeout: 2000})
-            const tableExists = await page.evaluate(() => {
-                return !!document.querySelector('table');
+
+            const isForbidden = await page.evaluate(() => {
+                const h1 = document.querySelector(`h1`);
+                return h1 ? h1.textContent.includes("Forbidden") : false
             });
 
-            if (!tableExists){
+            if (isForbidden){
+                log.warn("(варн временный) Нас забанило, перезапускаю браузер!")
+                await BrowserController.restartBrowser()
+                return await this.get_teacher_schedule(id, ++attemption)
+            }
+
+            const isTableNotExists = await page.evaluate(() => {
+                return !document.querySelector('table');
+            });
+
+            if (isTableNotExists){
                 await page.close()
                 await BrowserController.auth()
                 return await this.get_teacher_schedule(id, attemption)
             }
 
-
-            const tr_list_selector = 'table tr'
-
-            await page.waitForSelector(tr_list_selector)
 
             const tableHTML = await page.evaluate((selector) => {
                 const table = document.querySelector(selector);
@@ -130,7 +139,7 @@ class TeacherScheduleService {
 
             return schedule
         } catch (e) {
-            if (attemption < 2) {
+            if (attemption < 3) {
                 await page.close().catch(e => console.log(e))
                 return await this.get_teacher_schedule(id, ++attemption)
             } else {

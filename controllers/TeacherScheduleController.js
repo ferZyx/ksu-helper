@@ -42,7 +42,7 @@ class TeacherScheduleController {
                 return next(ApiError.BadRequest("Указан некорректный параметр id преподавателя"))
             }
 
-            if (id in this.schedule_cache && Date.now() - this.schedule_cache[id].timestamp <= 30 * 1000) {
+            if (id in this.schedule_cache && Date.now() - this.schedule_cache[id].timestamp <= 15 * 1000) {
                 return res.json(this.schedule_cache[id].schedule)
             }
 

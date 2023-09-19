@@ -65,7 +65,7 @@ class ScheduleController {
             }
             const cacheName = id + language
 
-            if (cacheName in this.schedule_cache && Date.now() - this.schedule_cache[cacheName].timestamp <= 30 * 1000) {
+            if (cacheName in this.schedule_cache && Date.now() - this.schedule_cache[cacheName].timestamp <= 15 * 1000) {
                 return res.json(this.schedule_cache[cacheName].schedule)
             }
 
