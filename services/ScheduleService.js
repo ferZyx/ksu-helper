@@ -134,7 +134,7 @@ class ScheduleService {
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
 
-            await page.waitForSelector("body", {timeout: 2000})
+            await page.waitForSelector("header", {timeout: 2000})
             const tableExists = await page.evaluate(() => {
                 return !!document.querySelector('table');
             });
