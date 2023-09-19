@@ -133,7 +133,20 @@ class TeacherScheduleService {
                         time, group
                     })
                 }
-                dailySchedule['groups'] = groups
+
+                const firstGroupIndex = groups.findIndex(item => item.group !== '');
+                let trimmedGroups = []
+                if (firstGroupIndex !== -1){
+                    const lastGroupIndex = groups.reverse().findIndex(item => item.group !== '');
+
+                    groups.reverse();
+
+                    trimmedGroups = groups.slice(firstGroupIndex, groups.length - lastGroupIndex);
+                }else{
+                    trimmedGroups = []
+                }
+
+                dailySchedule['groups'] = trimmedGroups
                 schedule.push(dailySchedule)
             }
 

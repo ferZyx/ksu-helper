@@ -206,10 +206,32 @@ class ScheduleService {
 
                     item_number += 1
                 }
+
+                const firstSubjectIndex = daily_subjects.findIndex(item => item.subject !== '');
+                let trimmedDailySubjects = []
+                if (firstSubjectIndex !== -1){
+                    const lastSubjectIndex = daily_subjects.reverse().findIndex(item => item.subject !== '');
+
+                    daily_subjects.reverse();
+
+                    trimmedDailySubjects = daily_subjects.slice(firstSubjectIndex, daily_subjects.length - lastSubjectIndex);
+                }else{
+                    trimmedDailySubjects = []
+                }
+
                 let daily_schedule = {
                     day,
-                    subjects: daily_subjects
+                    subjects: trimmedDailySubjects
                 }
+
+
+                // const lastSubjectIndex = daily_schedule.reverse().findIndex(item => item.subject !== '');
+                //
+                // daily_schedule.reverse();
+                //
+                // const trimmedDailySchedule = daily_schedule.slice(firstSubjectIndex, daily_schedule.length - lastSubjectIndex);
+
+
                 schedule.push(daily_schedule)
             }
 
