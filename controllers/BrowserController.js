@@ -2,8 +2,8 @@ import config from "../config.js";
 import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
-import ping from "ping";
-import ApiError from "../exceptions/apiError.js";
+// import ping from "ping";
+// import ApiError from "../exceptions/apiError.js";
 
 
 class BrowserController{
@@ -20,9 +20,9 @@ class BrowserController{
             if (!this.browser.isConnected()) {
                 await this.launchBrowser();
             }
-            if (!await this.isKsuAlive()) {
-                return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
-            }
+            // if (!await this.isKsuAlive()) {
+            //     return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
+            // }
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -88,15 +88,15 @@ class BrowserController{
 
     }
 
-    async isKsuAlive() {
-        try {
-            const result = await ping.promise.probe('schedule.ksu.kz', {timeout: 10});
-            return result.alive; // Возвращает true, если сайт доступен, иначе false
-        } catch (e) {
-            log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
-            return false;
-        }
-    }
+    // async isKsuAlive() {
+    //     try {
+    //         const result = await ping.promise.probe('schedule.ksu.kz', {timeout: 10});
+    //         return result.alive; // Возвращает true, если сайт доступен, иначе false
+    //     } catch (e) {
+    //         log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
+    //         return false;
+    //     }
+    // }
 
 }
 
