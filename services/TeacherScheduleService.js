@@ -80,7 +80,7 @@ class TeacherScheduleService {
         return linkObjects
     }
 
-    async get_teacher_schedule(id, attemption = 0) {
+    async get_teacher_schedule(id, attemption = 1) {
         const page = await BrowserController.browser.newPage()
         try {
             await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)

@@ -119,7 +119,7 @@ class ScheduleService {
 
     }
 
-    get_schedule_by_groupId = async (id, language, attemption = 0) => {
+    get_schedule_by_groupId = async (id, language, attemption = 1) => {
         function removeBrTags(text) {
             if (text.includes('<br>')) {
                 return removeBrTags(text.replace('<br>', '\n'));
