@@ -10,7 +10,7 @@ class ScheduleService {
         try {
             await page.goto('https://schedule.ksu.kz/login.php');
             // Дождемся, когда загрузится содержимое сайта
-            await page.waitForSelector('input', {timeout:10 * 1000});
+            await page.waitForSelector('input', {timeout:3 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
@@ -242,7 +242,7 @@ class ScheduleService {
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {
                 const path = `logs/error_${Date.now()}.png`
-                await page.screenshot({path, fullPage: true});
+                await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
                 await page.close().catch(e => console.log(e))
                 throw new Error("Ошибка при получении студенческого расписания. Ошибку заскринил." + e.message)
             }

@@ -76,8 +76,8 @@ class ScheduleController {
             return res.json(schedule)
         } catch (e) {
             log.error("Ошибка при получении student расписания: " + e.message + "\n\n На всякий случай запустил функцию authIfNot!", {stack: e.stack})
+            next(e)
             await BrowserController.authIfNot()
-                .finally(() => next(e))
         }
     }
 

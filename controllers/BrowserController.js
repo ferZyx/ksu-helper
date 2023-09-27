@@ -71,7 +71,7 @@ class BrowserController{
         const page = await this.browser.newPage();
         try {
             await page.goto("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read")
-            await page.waitForSelector("header", {timeout: 7000})
+            await page.waitForSelector("header", {timeout: 2000})
 
             const elementExists = await page.evaluate(() => {
                 return !!document.querySelector('table');
