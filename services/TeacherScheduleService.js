@@ -152,7 +152,7 @@ class TeacherScheduleService {
 
             return schedule
         } catch (e) {
-            if (attemption < 3) {
+            if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
                 return await this.get_teacher_schedule(id, ++attemption)
             } else {
