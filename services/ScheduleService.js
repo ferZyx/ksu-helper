@@ -245,7 +245,6 @@ class ScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
-                log.info("Рекурсия")
                 await sleep(1000);
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {

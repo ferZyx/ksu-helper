@@ -2,6 +2,7 @@ import BrowserController from "../controllers/BrowserController.js";
 import ApiError from "../exceptions/apiError.js";
 import HtmlService from "./HtmlService.js";
 import log from "../logging/logging.js";
+import {sleep} from "./ScheduleService.js";
 
 function getQueryParam(url, paramName) {
     const urlParts = url.split('?');
@@ -83,7 +84,7 @@ class TeacherScheduleService {
     async get_teacher_schedule(id, attemption = 1) {
         const page = await BrowserController.browser.newPage()
         try {
-            await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`)
+            await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`, {timeout:3000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
@@ -154,10 +155,11 @@ class TeacherScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
+                await sleep(1000);
                 return await this.get_teacher_schedule(id, ++attemption)
             } else {
-                const path = `logs/error_${Date.now()}.png`
-                await page.screenshot({path, fullPage: true});
+                // const path = `logs/error_${Date.now()}.png`
+                // await page.screenshot({path, fullPage: true});
                 await page.close().catch(e => console.log(e))
                 throw new Error("Ошибка при получении преподского расписания. Ошибку заскринил." + e.message)
             }
