@@ -3,12 +3,16 @@ import HtmlService from "./HtmlService.js";
 import config from "../config.js";
 import BrowserController from "../controllers/BrowserController.js";
 
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 class ScheduleService {
 
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
         try {
-            await page.goto('https://schedule.ksu.kz/login.php');
+            await page.goto('https://schedule.ksu.kz/login.php', {timeout:3000});
             // Дождемся, когда загрузится содержимое сайта
             await page.waitForSelector('input', {timeout:3 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
@@ -37,8 +41,8 @@ class ScheduleService {
 
             return {faculties_data, auth_cookie}
         } catch (e) {
-            const path = `logs/error_${Date.now()}.png`
-            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
+            // const path = `logs/error_${Date.now()}.png`
+            // await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
         }
@@ -132,7 +136,7 @@ class ScheduleService {
         await page.setDefaultTimeout(3000)
         await page.setDefaultNavigationTimeout(3000)
         try {
-            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
+            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:3000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
@@ -241,10 +245,12 @@ class ScheduleService {
         } catch (e) {
             if (attemption < 2) {
                 await page.close().catch(e => console.log(e))
+                log.info("Рекурсия")
+                await sleep(1000);
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {
-                const path = `logs/error_${Date.now()}.png`
-                await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
+                // const path = `logs/error_${Date.now()}.png`
+                // await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
                 await page.close().catch(e => console.log(e))
                 throw new Error("Ошибка при получении студенческого расписания. Ошибку заскринил." + e.message)
             }

@@ -2,9 +2,9 @@ import config from "../config.js";
 import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
-import ping from "ping";
-import ApiError from "../exceptions/apiError.js";
-import axios from "axios";
+// import ping from "ping";
+// import ApiError from "../exceptions/apiError.js";
+// import axios from "axios";
 
 
 class BrowserController{
@@ -21,9 +21,9 @@ class BrowserController{
             if (!this.browser.isConnected()) {
                 await this.launchBrowser();
             }
-            if (!await this.isKsuAlive()) {
-                return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
-            }
+            // if (!await this.isKsuAlive()) {
+            //     return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
+            // }
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -89,15 +89,18 @@ class BrowserController{
 
     }
 
-    async isKsuAlive() {
-        try {
-            await axios.get("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read", {timeout:3000})
-            return true; // Возвращает true, если сайт доступен, иначе false
-        } catch (e) {
-            log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
-            return false;
-        }
-    }
+    // async isKsuAlive() {
+    //     const page = await this.browser.newPage();
+    //     try {
+    //         await page.goto("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read", {timeout:3000})
+    //         return true; // Возвращает true, если сайт доступен, иначе false
+    //     } catch (e) {
+    //         log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
+    //         return false;
+    //     }finally {
+    //         await page.close()
+    //     }
+    // }
 
 }
 
