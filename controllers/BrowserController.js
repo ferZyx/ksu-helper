@@ -91,7 +91,7 @@ class BrowserController{
 
     async isKsuAlive() {
         try {
-            await axios.get("https://schedule.ksu.kz", {timeout:3000})
+            await axios.get("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read", {timeout:3000})
             return true; // Возвращает true, если сайт доступен, иначе false
         } catch (e) {
             log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
