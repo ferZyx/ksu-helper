@@ -38,7 +38,7 @@ class ScheduleService {
             return {faculties_data, auth_cookie}
         } catch (e) {
             const path = `logs/error_${Date.now()}.png`
-            await page.screenshot({path, fullPage: true});
+            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
         }
@@ -129,6 +129,8 @@ class ScheduleService {
         }
 
         const page = await BrowserController.browser.newPage();
+        await page.setDefaultTimeout(3000)
+        await page.setDefaultNavigationTimeout(3000)
         try {
             await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`)
 
@@ -237,7 +239,7 @@ class ScheduleService {
 
             return schedule
         } catch (e) {
-            if (attemption < 3) {
+            if (attemption < 1) {
                 await page.close().catch(e => console.log(e))
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {

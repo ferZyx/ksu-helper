@@ -2,8 +2,9 @@ import config from "../config.js";
 import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
-// import ping from "ping";
-// import ApiError from "../exceptions/apiError.js";
+import ping from "ping";
+import ApiError from "../exceptions/apiError.js";
+import axios from "axios";
 
 
 class BrowserController{
@@ -20,9 +21,9 @@ class BrowserController{
             if (!this.browser.isConnected()) {
                 await this.launchBrowser();
             }
-            // if (!await this.isKsuAlive()) {
-            //     return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
-            // }
+            if (!await this.isKsuAlive()) {
+                return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
+            }
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -63,7 +64,7 @@ class BrowserController{
             this.auth_cookie = {cookie: auth_cookie, time:Date.now()}
             log.info("Произведена авторизация/получен список факультетов на schedule.ksu.kz")
         } catch (e) {
-            throw new Error(e)
+            log.error("Не получилось авторизоваться на schedule.ksu.kz | " + e.message)
         }
     }
 
@@ -88,15 +89,15 @@ class BrowserController{
 
     }
 
-    // async isKsuAlive() {
-    //     try {
-    //         const result = await ping.promise.probe('schedule.ksu.kz', {timeout: 10});
-    //         return result.alive; // Возвращает true, если сайт доступен, иначе false
-    //     } catch (e) {
-    //         log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
-    //         return false;
-    //     }
-    // }
+    async isKsuAlive() {
+        try {
+            await axios.get("https://schedule.ksu.kz", {timeout:3000})
+            return true; // Возвращает true, если сайт доступен, иначе false
+        } catch (e) {
+            log.error("Ошибка при попытке пингануть ксу: " + e.message, e)
+            return false;
+        }
+    }
 
 }
 
