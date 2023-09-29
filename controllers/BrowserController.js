@@ -34,11 +34,11 @@ class BrowserController{
     async launchBrowser() {
         try {
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({headless: false, args: ['--window-size=900,800','--window-position=-10,0']})
+                this.browser = await puppeteer.launch({headless: false, args: ['--window-size=900,800','--window-position=-10,0', '--proxy-server=http://185.200.119.90:8443']})
             } else {
                 this.browser = await puppeteer.launch({
                     headless: "new",
-                    args: ["--no-sandbox"],
+                    args: ["--no-sandbox", '--proxy-server=http://185.200.119.90:8443'],
                     executablePath: '/usr/bin/google-chrome-stable'
                 })
             }
