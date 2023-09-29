@@ -11,6 +11,7 @@ const config = {
     KSU_PASSWORD:process.env.KSU_PASSWORD,
     LOG_CHANEL_ID:process.env.LOG_CHANEL_ID,
     LOGGER_TG_TOKEN:process.env.LOGGER_TG_TOKEN,
+    HTTP_PROXY:process.env.HTTP_PROXY,
 }
 
 export default config

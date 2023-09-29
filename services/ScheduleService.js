@@ -12,7 +12,7 @@ class ScheduleService {
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
         try {
-            await page.goto('https://schedule.ksu.kz/login.php', {timeout:3000});
+            await page.goto('https://schedule.ksu.kz/login.php', {waitUntil:"load"});
             // Дождемся, когда загрузится содержимое сайта
             await page.waitForSelector('input', {timeout:3 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
@@ -124,6 +124,10 @@ class ScheduleService {
     }
 
     get_schedule_by_groupId = async (id, language, attemption = 1) => {
+        if(attemption > 2){
+            throw new Error("Ошибка при получении расписания. слишком много рекурсий")
+        }
+
         function removeBrTags(text) {
             if (text.includes('<br>')) {
                 return removeBrTags(text.replace('<br>', '\n'));
@@ -133,10 +137,8 @@ class ScheduleService {
         }
 
         const page = await BrowserController.browser.newPage();
-        await page.setDefaultTimeout(3000)
-        await page.setDefaultNavigationTimeout(3000)
         try {
-            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:3000})
+            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {waitUntil:"load"})
 
             await page.waitForSelector("body", {timeout: 2000})
 
@@ -156,6 +158,7 @@ class ScheduleService {
             });
 
             if (isTableNotExists){
+                log.info("table not exists handler, attemption = " + attemption)
                 await page.close()
                 await BrowserController.auth()
                 return await this.get_schedule_by_groupId(id, language, ++attemption)
