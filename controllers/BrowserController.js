@@ -39,7 +39,7 @@ class BrowserController{
             } else {
                 this.browser = await puppeteer.launch({
                     headless: "new",
-                    args: [`--no-sandbox", '--proxy-server=${config.HTTP_PROXY}`],
+                    args: ["--no-sandbox", `--proxy-server=${config.HTTP_PROXY}`],
                     executablePath: '/usr/bin/google-chrome-stable'
                 })
             }
