@@ -33,6 +33,7 @@ class BrowserController{
 
     async launchBrowser() {
         try {
+            console.log("Запускаю браузер.")
             if (config.DEBUG) {
                 this.browser = await puppeteer.launch({headless: false, args: ['--window-size=900,800','--window-position=-10,0', `--proxy-server=${config.HTTP_PROXY}`]})
             } else {
@@ -42,6 +43,7 @@ class BrowserController{
                     executablePath: '/usr/bin/google-chrome-stable'
                 })
             }
+            console.log('Браузер запущен')
             await this.auth()
         } catch (e) {
             throw new Error(e)
@@ -59,7 +61,9 @@ class BrowserController{
 
     async auth() {
         try {
+            console.log("Начинаю авторизацию")
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
+            console.log("Мы авторизованы")
             this.faculties_data = faculties_data
             this.auth_cookie = {cookie: auth_cookie, time:Date.now()}
             log.info("Произведена авторизация/получен список факультетов на schedule.ksu.kz")
