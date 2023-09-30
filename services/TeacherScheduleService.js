@@ -84,7 +84,7 @@ class TeacherScheduleService {
     async get_teacher_schedule(id, attemption = 1) {
         const page = await BrowserController.browser.newPage()
         try {
-            await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`, {timeout:5000})
+            await page.goto(`https://schedule.ksu.kz/report_prep1.php?IdPrep=${id}`, {timeout:7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 

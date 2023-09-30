@@ -138,7 +138,7 @@ class ScheduleService {
 
         const page = await BrowserController.browser.newPage();
         try {
-            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {waitUntil:"load"})
+            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
