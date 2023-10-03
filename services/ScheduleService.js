@@ -2,6 +2,7 @@ import log from "../logging/logging.js";
 import HtmlService from "./HtmlService.js";
 import config from "../config.js";
 import BrowserController from "../controllers/BrowserController.js";
+import BrowserService from "./BrowserService.js";
 
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -149,7 +150,7 @@ class ScheduleService {
 
             if (isForbidden){
                 log.warn("(варн временный) Нас забанило, перезапускаю браузер!")
-                await BrowserController.restartBrowser()
+                await BrowserService.restartBrowser()
                 return await this.get_schedule_by_groupId(id, language, ++attemption)
             }
 

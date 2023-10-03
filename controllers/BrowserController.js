@@ -2,6 +2,7 @@ import config from "../config.js";
 import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
+import BrowserService from "../services/BrowserService.js";
 // import ping from "ping";
 // import ApiError from "../exceptions/apiError.js";
 // import axios from "axios";
@@ -18,7 +19,7 @@ class BrowserController{
 
     allChecksCall = async (req, res, next) => {
         try {
-            if (!this.browser.isConnected()) {
+            if (!this.browser?.isConnected()) {
                 await this.launchBrowser();
             }
             // if (!await this.isKsuAlive()) {
@@ -49,13 +50,13 @@ class BrowserController{
             throw new Error(e)
         }
     }
-
-    async restartBrowser(){
+    // need to fix this shit.
+    async restartBrowser(req, res, next){
         try{
-            await this.browser.close()
-            await this.launchBrowser()
+            await BrowserService.restartBrowser()
+            return res.json("Restarted")
         }catch (e) {
-            throw e
+            next(e)
         }
     }
 

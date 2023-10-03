@@ -3,6 +3,7 @@ import ApiError from "../exceptions/apiError.js";
 import HtmlService from "./HtmlService.js";
 import log from "../logging/logging.js";
 import {sleep} from "./ScheduleService.js";
+import BrowserService from "./BrowserService.js";
 
 function getQueryParam(url, paramName) {
     const urlParts = url.split('?');
@@ -95,7 +96,7 @@ class TeacherScheduleService {
 
             if (isForbidden){
                 log.warn("(варн временный) Нас забанило, перезапускаю браузер!")
-                await BrowserController.restartBrowser()
+                await BrowserService.restartBrowser()
                 return await this.get_teacher_schedule(id, ++attemption)
             }
 
