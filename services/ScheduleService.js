@@ -159,6 +159,7 @@ class ScheduleService {
             });
 
             if (isTableNotExists){
+                await sleep(10000)
                 log.info("table not exists handler, attemption = " + attemption)
                 await page.close()
                 await BrowserController.auth()
@@ -243,6 +244,14 @@ class ScheduleService {
 
 
                 schedule.push(daily_schedule)
+            }
+
+            for (const daily_schedule of schedule){
+                for (const subject of daily_schedule.subjects){
+                    if (subject.subject == "\n"){
+                        log.error("[test] Вижу кривое расписание в ксу хелпере. сюда можно встроить обработчик этого дерьма и всё будет фикситься автоматически")
+                    }
+                }
             }
 
             return schedule
