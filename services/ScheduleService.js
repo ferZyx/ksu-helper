@@ -248,8 +248,11 @@ class ScheduleService {
 
             for (const daily_schedule of schedule){
                 for (const subject of daily_schedule.subjects){
-                    if (subject.subject == "\n"){
-                        log.error("[test] Вижу кривое расписание в ксу хелпере. сюда можно встроить обработчик этого дерьма и всё будет фикситься автоматически")
+                    if (subject.subject === "\n"){
+                        log.warn("[test] Вижу кривое расписание в ксу хелпере. Запускаю рестарт браузера. Group: " + id)
+                        await BrowserService.restartBrowser()
+                        log.warn("[test] Делаю рекурсию для получения расписания повторно. ")
+                        return await this.get_schedule_by_groupId(id, language, ++attemption)
                     }
                 }
             }
