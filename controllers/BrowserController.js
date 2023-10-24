@@ -8,7 +8,7 @@ import BrowserService from "../services/BrowserService.js";
 // import axios from "axios";
 
 
-class BrowserController{
+class BrowserController {
     browser;
     auth_cookie;
     faculties_data;
@@ -36,26 +36,36 @@ class BrowserController{
         try {
             console.log("Запускаю браузер.")
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({headless: false, args: ['--window-size=900,800','--window-position=-10,0', `--proxy-server=${config.HTTP_PROXY}`]})
+                this.browser = await puppeteer.launch({
+                    headless: false,
+                    args: ['--window-size=900,800', '--window-position=-10,0', `--proxy-server=${config.HTTP_PROXY}`],
+                    ignoreHTTPSErrors: true,
+                })
             } else {
                 this.browser = await puppeteer.launch({
                     headless: "new",
-                    args: ["--no-sandbox"],
-                    executablePath: '/usr/bin/google-chrome-stable'
+                    args: ["--no-sandbox", `--proxy-server=${config.HTTP_PROXY}`],
+                    executablePath: '/usr/bin/google-chrome-stable',
+                    ignoreHTTPSErrors: true,
                 })
             }
-            console.log('Браузер запущен')
+            const page = await this.browser.newPage()
+            await page.authenticate({ username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD });
+            await page.goto('https://2ip.ru');
+            await page.close()
+            console.log("Прокси авторизован")
             await this.auth()
         } catch (e) {
             throw new Error(e)
         }
     }
+
     // need to fix this shit.
-    async restartBrowser(req, res, next){
-        try{
+    async restartBrowser(req, res, next) {
+        try {
             await BrowserService.restartBrowser()
             return res.json("Restarted")
-        }catch (e) {
+        } catch (e) {
             next(e)
         }
     }
@@ -66,7 +76,7 @@ class BrowserController{
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
             console.log("Мы авторизованы")
             this.faculties_data = faculties_data
-            this.auth_cookie = {cookie: auth_cookie, time:Date.now()}
+            this.auth_cookie = {cookie: auth_cookie, time: Date.now()}
             log.info("Произведена авторизация/получен список факультетов на schedule.ksu.kz")
         } catch (e) {
             log.error("Не получилось авторизоваться на schedule.ksu.kz | " + e.message)
@@ -84,12 +94,12 @@ class BrowserController{
             });
             await page.close()
 
-            if (!elementExists){
+            if (!elementExists) {
                 await this.auth()
             }
         } catch (e) {
             await page.close()
-            log.error("Ошибка при попытке проверить авторизован или нет. " + e.message, {stack:e.stack})
+            log.error("Ошибка при попытке проверить авторизован или нет. " + e.message, {stack: e.stack})
         }
 
     }

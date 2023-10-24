@@ -12,6 +12,8 @@ const config = {
     LOG_CHANEL_ID:process.env.LOG_CHANEL_ID,
     LOGGER_TG_TOKEN:process.env.LOGGER_TG_TOKEN,
     HTTP_PROXY:process.env.HTTP_PROXY,
+    PROXY_LOGIN:process.env.PROXY_LOGIN,
+    PROXY_PASSWORD:process.env.PROXY_PASSWORD,
 }
 
 export default config
