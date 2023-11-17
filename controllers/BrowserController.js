@@ -14,7 +14,9 @@ class BrowserController {
     faculties_data;
 
     constructor() {
-        this.launchBrowser().then(() => log.info("Браузер запущен"))
+        if (!config.DEBUG){
+            this.launchBrowser().then(() => log.info("Браузер запущен"))
+        }
     }
 
     allChecksCall = async (req, res, next) => {

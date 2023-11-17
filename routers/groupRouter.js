@@ -25,7 +25,7 @@ groupRouter.get("/my_group_list",
     authMiddleware,
     GroupController.my_group_list)
 
-//
+// Кушает в себя query-string groupId=
 groupRouter.get("/info",
     authMiddleware,
     GroupController.info)
