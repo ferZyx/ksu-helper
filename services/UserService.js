@@ -2,11 +2,7 @@ import User from "../models/User.js"
 import Role from "../models/Role.js"
 import bcrypt from "bcryptjs";
 import TokenService from "../services/TokenService.js"
-import {validationResult} from "express-validator";
-import token from "../models/Token.js";
 import ApiError from "../exceptions/apiError.js";
-import Token from "../models/Token.js";
-import tokenService from "../services/TokenService.js";
 
 class UserService {
     async registration(username, password) {
@@ -60,8 +56,8 @@ class UserService {
             throw ApiError.UnauthorizedError()
         }
 
-        const tokenData = tokenService.validateRefreshToken(refreshToken)
-        const tokenFromDb = tokenService.findToken(refreshToken)
+        const tokenData = TokenService.validateRefreshToken(refreshToken)
+        const tokenFromDb = TokenService.findToken(refreshToken)
 
         if (!tokenData || !tokenFromDb){
             throw ApiError.UnauthorizedError()
@@ -77,6 +73,14 @@ class UserService {
             ...tokens,
             userData
         }
+    }
+
+    async get_user(_id){
+        return User.findOne({_id});
+    }
+
+    async update_user(_id, userData){
+        return User.findOneAndUpdate({_id}, userData, {returnDocument:"after"})
     }
 }
 

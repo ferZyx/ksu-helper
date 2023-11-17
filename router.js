@@ -5,6 +5,7 @@ import scheduleRouter from "./routers/scheduleRouter.js";
 import errorRouter from "./routers/errorRouter.js";
 import teacherRouter from "./routers/teacherRouter.js";
 import teacherScheduleRouter from "./routers/teacherScheduleRouter.js";
+import groupRouter from "./routers/groupRouter.js";
 
 const router = new Router()
 
@@ -14,5 +15,6 @@ router.use("/schedule", scheduleRouter)
 router.use("/error", errorRouter)
 router.use("/teacher", teacherRouter)
 router.use("/teacherSchedule", teacherScheduleRouter)
+router.use("/group", groupRouter)
 
 export default router

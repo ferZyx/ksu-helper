@@ -36,8 +36,8 @@ class BrowserController {
         try {
             console.log("Запускаю браузер.")
             if (config.DEBUG) {
-                this.browser = await puppeteer.launch({
-                    headless: false,
+                return this.browser = await puppeteer.launch({
+                    headless: true,
                     args: ['--window-size=900,800', '--window-position=-10,0', `--proxy-server=${config.HTTP_PROXY}`],
                     ignoreHTTPSErrors: true,
                 })
@@ -49,11 +49,13 @@ class BrowserController {
                     ignoreHTTPSErrors: true,
                 })
             }
-            const page = await this.browser.newPage()
-            await page.authenticate({ username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD });
-            await page.goto('https://2ip.ru');
-            await page.close()
-            console.log("Прокси авторизован")
+            if (config.PROXY_LOGIN){
+                const page = await this.browser.newPage()
+                await page.authenticate({ username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD });
+                await page.goto('https://2ip.ru');
+                await page.close()
+                console.log("Прокси авторизован")
+            }
             await this.auth()
         } catch (e) {
             throw new Error(e)
