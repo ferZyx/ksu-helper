@@ -2,44 +2,28 @@ import {Router} from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import GroupController from "../controllers/GroupController.js";
 import {body} from "express-validator"
+import roleMiddleware from "../middlewares/roleMiddleware.js";
 
 // const customRegex = /^[a-zA-Z0-9_\-\.]+$/;
 
 const groupRouter = new Router()
 
 
-// Кушает в бади пока что только поле name(Любое не пустое)
-groupRouter.put("/create",
+groupRouter.post("",
     authMiddleware,
     body("name", "Поле name не должно быть пустым").notEmpty(),
     GroupController.create)
 
-// Кушает в бади поле groupId,
-groupRouter.delete("/delete",
+groupRouter.get("",
     authMiddleware,
-    body("groupId", "Поле groupId не должно быть пустым").notEmpty(),
-    GroupController.delete)
+    roleMiddleware(['Admin']),
+    GroupController.get_all)
 
-// Никаких параметров
-groupRouter.get("/my_group_list",
+groupRouter.get("/:group_id",
     authMiddleware,
-    GroupController.my_group_list)
-
-// Кушает в себя query-string groupId=
-groupRouter.get("/info",
-    authMiddleware,
-    GroupController.info)
+    GroupController.get_one)
 
 
-// groupRouter.post("/access_join_request")
-// groupRouter.post("/deny_join_request")
-// groupRouter.post("/give_group_admin_rights")
-// groupRouter.post("/delete_group_admin_rights")
-// groupRouter.post("/send_join_request")
-// groupRouter.post("/leave_group")
-//
-// groupRouter.get("/search")
-// groupRouter.get("/get_group_info_by_userId")
 
 
 export default groupRouter

@@ -8,7 +8,7 @@ class UserService {
     async registration(username, password) {
         const candidate = await User.findOne({username})
         if (candidate) {
-            throw ApiError.BadRequest("Пользователь с таким именем уже существует", )
+            throw ApiError.Conflict("Пользователь с таким именем уже существует", )
         }
         const salt = await bcrypt.genSalt(8);
         const hashPassword = await bcrypt.hash(password, salt);
@@ -29,12 +29,12 @@ class UserService {
     async login(username, password) {
         const user = await User.findOne({username})
         if (!user) {
-            throw ApiError.BadRequest("Пользователя с таким именем не найдено.", )
+            throw ApiError.Not_Found("Пользователя с таким именем не найдено.", )
         }
 
         const correctPassword = await bcrypt.compareSync(password, user.password)
         if (!correctPassword){
-            throw ApiError.BadRequest("Вы ввели неверный пароль.", )
+            throw ApiError.UnauthorizedError("Вы ввели неверный пароль.", )
         }
 
         const { password:psw, ...userData } = user.toObject();
@@ -75,8 +75,8 @@ class UserService {
         }
     }
 
-    async get_user(_id){
-        return User.findOne({_id});
+    async get_one(_id){
+        return User.findById({_id});
     }
 
     async update_user(_id, userData){

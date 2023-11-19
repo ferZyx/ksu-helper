@@ -13,11 +13,19 @@ class GroupService {
         })
     }
 
-    async get(_id) {
+    async get_one(_id) {
         try{
-            return Group.findOne({_id});
+            return Group.findById({_id});
         }catch (e) {
             throw new Error(`Ошибка при поптыке получить группу id: ${_id}. error: ${e.stack}`)
+        }
+    }
+
+    async get_all() {
+        try{
+            return Group.find({});
+        }catch (e) {
+            throw new Error(`Ошибка при поптыке получить список всех групп. error: ${e.stack}`)
         }
     }
 
@@ -34,6 +42,16 @@ class GroupService {
             return Group.find({members:userId});
         }catch (e) {
             throw new Error(`Ошибка при попытке получить список групп юзера: ${userId}. error: ${e.stack}`)
+        }
+    }
+
+    async give_group_admin_rights(group, userId){
+        try{
+            group.admins.push(userId);
+
+            return group.save();
+        }catch (e) {
+            throw new Error(`Ошибка при попытке выдать права администратора пользователю: ${userId}. error: ${e.stack}`)
         }
     }
 

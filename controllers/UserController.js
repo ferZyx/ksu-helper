@@ -68,6 +68,19 @@ class UserController {
         }
     }
 
+    async get_me(req,res,next){
+        try{
+            const userId = req.user.userId
+            const user = await UserService.get_one(userId)
+
+            const { password, ...resultUserObject } = user._doc;
+
+            return res.json(resultUserObject)
+        }catch (e) {
+            next(e)
+        }
+    }
+
 }
 
 export default new UserController()

@@ -10,11 +10,11 @@ const roleMiddleware = (roles) => {
 
         try {
             if (!req.headers.authorization) {
-                return res.status(401).json({message: "Пользователь не авторизован"})
+                return next(ApiError.UnauthorizedError())
             } else {
                 const token = req.headers.authorization.split(' ')[1]
                 if (!token) {
-                    return res.status(401).json({message: "Пользователь не авторизован"})
+                    return next(ApiError.UnauthorizedError())
                 }
 
                 const {roles: userRoles} = jwt.verify(token, config.JWT_ACCESS_SECRET)
@@ -25,7 +25,7 @@ const roleMiddleware = (roles) => {
                     }
                 })
                 if (!hasRole) {
-                    return res.status(403).json({message: "У вас нет доступа"})
+                    return next(ApiError.Forbidden())
                 }
                 next();
             }
