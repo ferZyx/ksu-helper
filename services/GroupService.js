@@ -15,7 +15,7 @@ class GroupService {
 
     async get_one(_id) {
         try{
-            return Group.findById({_id});
+            return Group.findById(_id).populate('owner members admins join_requests').exec();
         }catch (e) {
             throw new Error(`Ошибка при поптыке получить группу id: ${_id}. error: ${e.stack}`)
         }

@@ -2,6 +2,7 @@ import ApiError from "../exceptions/apiError.js";
 import {validationResult} from "express-validator";
 import GroupService from "../services/GroupService.js";
 import mongoose from "mongoose";
+import {GroupDTO} from "../dtos/GroupDTO.js";
 
 
 class GroupController {
@@ -44,7 +45,23 @@ class GroupController {
             if (!group){
                 return next(ApiError.Not_Found("Группа не найдена."))
             }
-            return res.json(group)
+            const groupDTO = new GroupDTO(group)
+
+            const isAdmin = req.user.roles.includes("Admin")
+            const isGroupAdmin = group.admins.some(admin => admin._id.toString() === req.user.userId)
+            const isGroupMember = group.members.some(member => member._id.toString() === req.user.userId)
+
+            if (isAdmin ){
+                return res.json(groupDTO)
+            }
+            if (isGroupAdmin){
+                return res.json(groupDTO.forGroupAdmin())
+            }
+            if (isGroupMember){
+                return res.json(groupDTO.forMembers())
+            }
+            return res.json(groupDTO.forRandom())
+
         } catch (e) {
             console.log(e)
             next(e)

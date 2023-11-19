@@ -10,12 +10,12 @@ const authMiddleware = (req, res, next) => {
         if (req.headers.authorization) {
             const token = req.headers.authorization.split(' ')[1]
             if (!token) {
-                return res.status(401).json({message: "Пользователь не авторизован."})
+                return next(ApiError.UnauthorizedError())
             }
             req.user = jwt.verify(token, config.JWT_ACCESS_SECRET)
             next()
         } else{
-            return res.status(401).json({message: "Пользователь не авторизован."})
+            return next(ApiError.UnauthorizedError())
         }
     } catch (e) {
         next(ApiError.UnauthorizedError())

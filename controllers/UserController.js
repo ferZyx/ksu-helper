@@ -3,6 +3,7 @@ import UserService from "../services/UserService.js";
 import ApiError from "../exceptions/apiError.js";
 import userService from "../services/UserService.js";
 import log from "../logging/logging.js";
+import {UserDTO} from "../dtos/UserDTO.js";
 
 
 class UserController {
@@ -28,6 +29,7 @@ class UserController {
             const {username, password} = req.body
             const userData = await userService.login(username, password)
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly:true})
+            res.cookie('accessToken', userData.accessToken, {maxAge: 15 * 60 * 1000, httpOnly:true})
             return res.json(userData)
         } catch (e) {
             log.error("Ошибка при авторизации пользователя: ", e)
@@ -73,9 +75,9 @@ class UserController {
             const userId = req.user.userId
             const user = await UserService.get_one(userId)
 
-            const { password, ...resultUserObject } = user._doc;
+            const userDto = new UserDTO(user)
 
-            return res.json(resultUserObject)
+            return res.json(userDto)
         }catch (e) {
             next(e)
         }
