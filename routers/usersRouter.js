@@ -4,9 +4,12 @@ import UserController from "../controllers/UserController.js";
 
 export const usersRouter = new Router()
 
-// Никаких параметров
 usersRouter.get("/me",
     authMiddleware,
     UserController.get_me)
+
+usersRouter.get("/me/groups",
+    authMiddleware,
+    UserController.my_groups)
 
 

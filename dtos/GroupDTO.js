@@ -14,17 +14,6 @@ export class GroupDTO {
         this.updatedAt = group.updatedAt
     }
 
-    forGroupAdmin(){
-
-    }
-
-    // Без поля с заявками в группу
-    forMembers() {
-        const {join_requests, ...groupForMembers} = this;
-
-        return groupForMembers;
-    }
-
     forRandom() {
         return {
             _id: this._id,
