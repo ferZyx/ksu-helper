@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "https://tolyan.me", credentials: true }));
 app.use((req, res, next) => {
   const decodedUrl = decodeURIComponent(req.url);
   log.info(`${req.method} ${decodedUrl}`);
