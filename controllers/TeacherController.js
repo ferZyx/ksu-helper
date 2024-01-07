@@ -9,7 +9,7 @@ class TeacherController{
             await page.goto('https://buketov.edu.kz/ru/page/faculty');
 
             const faculties = (await page.$$('h4 a')).slice(0, 12);
-
+            console.log(faculties)
             for (const faculty of faculties) {
                 const facultyHrefHandle = await faculty.getProperty('href');
                 const facultyHref = await facultyHrefHandle.jsonValue();
@@ -20,16 +20,16 @@ class TeacherController{
                 await facultyPage.waitForSelector('div.dropdown a');
 
                 const departments = await facultyPage.$$('div.dropdown a');
-
+                console.log(departments)
                 for (const department of departments) {
                     const departmentHrefHandle = await department.getProperty('href');
                     const departmentHref = await departmentHrefHandle.jsonValue();
                     const departmentName = await department.evaluate(node => node.textContent);
 
                     const teachersPage = await BrowserController.browser.newPage();
-                    await teachersPage.goto(departmentHref + '3');
-
+                    await teachersPage.goto(departmentHref);
                     const teachers = await teachersPage.$$(`div.col-md-7 a`);
+                    console.log(teachers)
                     for (const teacher of teachers) {
                         const teacherHrefHandle = await teacher.getProperty('href');
                         const teacherHref = await teacherHrefHandle.jsonValue();

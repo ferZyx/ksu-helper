@@ -14,7 +14,7 @@ class BrowserController {
     faculties_data;
 
     constructor() {
-        if (!config.DEBUG){
+        if (!config.DEBUG || true){
             this.launchBrowser().then(() => log.info("Браузер запущен"))
         }
     }
@@ -36,11 +36,10 @@ class BrowserController {
 
     async launchBrowser() {
         try {
-            console.log("Запускаю браузер.")
             if (config.DEBUG) {
                 return this.browser = await puppeteer.launch({
-                    headless: true,
-                    args: ['--window-size=900,800', '--window-position=-10,0', `--proxy-server=${config.HTTP_PROXY}`],
+                    headless: false,
+                    args: ['--window-size=900,800', '--window-position=-10,0', ],
                     ignoreHTTPSErrors: true,
                 })
             } else {
