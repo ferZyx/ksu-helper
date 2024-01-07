@@ -28,16 +28,17 @@ class TeacherController{
 
                     const teachersPage = await BrowserController.browser.newPage();
                     await teachersPage.goto(departmentHref);
-                    const teachers = await teachersPage.$$(`div.col-md-7 a`);
+                    const teachers = await teachersPage.$$(`#hiddenDiv3 div p a`);
                     console.log(teachers)
                     for (const teacher of teachers) {
                         const teacherHrefHandle = await teacher.getProperty('href');
                         const teacherHref = await teacherHrefHandle.jsonValue();
                         const teacherName = await teacher.evaluate(node => node.textContent);
-
-                        all_teachers.push({
+                        const teacherData = {
                             name:teacherName, faculty:facultyName, department:departmentName, href:teacherHref
-                        })
+                        }
+                        all_teachers.push(teacherData)
+                        console.log(teacherData)
                     }
                     await teachersPage.close()
                 }
