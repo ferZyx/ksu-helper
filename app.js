@@ -19,7 +19,7 @@ app.use((req, res, next) => {
   log.info(`${req.method} ${decodedUrl}`);
   next();
 });
-app.use(router);
+app.use('/express/api',router);
 app.use(errorMiddleware);
 
 const appStart = async () => {
