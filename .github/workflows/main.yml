@@ -26,14 +26,14 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER_IP }} 'bash /var/www/deployFiles/ksu-helper.sh'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER_IP }} 'bash /var/www/deployFiles/express-ksu-helper.sh'
 
       - name: Notify Telegram about successful commit
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: |
+          message: | 
             [${{ github.repository }}]
             New commit deployed! ${{ github.event.commits[0].message }}!
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
