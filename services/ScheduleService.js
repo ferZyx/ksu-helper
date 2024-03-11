@@ -19,8 +19,12 @@ class ScheduleService {
         })
         console.log("authenticated")
         try {
-            await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
+            const response = await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
             console.log('Зашел на логин.пхп')
+            console.log(response.headers())
+            console.log(response.status())
+            console.log(response.statusText())
+            console.log(response.request())
             const path = `logs/зашел_${Date.now()}.png`
             await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             // Дождемся, когда загрузится содержимое сайта
