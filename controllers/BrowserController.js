@@ -43,12 +43,21 @@ class BrowserController {
                     ignoreHTTPSErrors: true,
                 })
             } else {
-                this.browser = await puppeteer.launch({
-                    headless: "new",
-                    args: ["--no-sandbox", `--proxy-server=${config.HTTP_PROXY}`],
-                    executablePath: '/usr/bin/google-chrome-stable',
-                    ignoreHTTPSErrors: true,
-                })
+                if (config.PROXY_LOGIN && config.USE_PROXY){
+                    this.browser = await puppeteer.launch({
+                        headless: "new",
+                        args: ["--no-sandbox", `--proxy-server=${config.HTTP_PROXY}`],
+                        executablePath: '/usr/bin/google-chrome-stable',
+                        ignoreHTTPSErrors: true,
+                    })
+                }else{
+                    this.browser = await puppeteer.launch({
+                        headless: "new",
+                        args: ["--no-sandbox"],
+                        executablePath: '/usr/bin/google-chrome-stable',
+                        ignoreHTTPSErrors: true,
+                    })
+                }
             }
             if (config.PROXY_LOGIN && config.USE_PROXY){
                 const page = await this.browser.newPage()
