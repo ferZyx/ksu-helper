@@ -12,19 +12,8 @@ class ScheduleService {
 
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
-        console.log("authenticating")
-        await page.authenticate({
-            username: 'zal',
-            password: 'zal'
-        })
-        console.log("authenticated")
         try {
-            const response = await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
-            console.log('Зашел на логин.пхп')
-            console.log(response.headers())
-            console.log(response.status())
-            const path = `logs/зашел_${Date.now()}.png`
-            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
+            await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
             // Дождемся, когда загрузится содержимое сайта
             await page.waitForSelector('input', {timeout:10 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
