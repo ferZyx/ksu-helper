@@ -12,8 +12,16 @@ class ScheduleService {
 
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
+        console.log("authenticating")
+        await page.authenticate({
+            username: config.KSU_LOGIN,
+            password: config.KSU_PASSWORD
+        })
+        console.log("authenticated")
         try {
             await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
+            console.log('Зашел на логин.пхп')
+
             // Дождемся, когда загрузится содержимое сайта
             await page.waitForSelector('input', {timeout:3 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
