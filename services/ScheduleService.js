@@ -21,9 +21,10 @@ class ScheduleService {
         try {
             await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
             console.log('Зашел на логин.пхп')
-
+            const path = `logs/зашел_${Date.now()}.png`
+            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             // Дождемся, когда загрузится содержимое сайта
-            await page.waitForSelector('input', {timeout:3 * 1000});
+            await page.waitForSelector('input', {timeout:10 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
@@ -53,8 +54,8 @@ class ScheduleService {
 
             return {faculties_data, auth_cookie}
         } catch (e) {
-            // const path = `logs/error_${Date.now()}.png`
-            // await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
+            const path = `logs/error_${Date.now()}.png`
+            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
         }
