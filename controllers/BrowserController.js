@@ -37,7 +37,7 @@ class BrowserController {
     async launchBrowser() {
         try {
             if (config.DEBUG) {
-                return this.browser = await puppeteer.launch({
+                this.browser = await puppeteer.launch({
                     headless: false,
                     args: ['--window-size=900,800', '--window-position=-10,0', ],
                     ignoreHTTPSErrors: true,
@@ -50,7 +50,7 @@ class BrowserController {
                     ignoreHTTPSErrors: true,
                 })
             }
-            if (config.PROXY_LOGIN){
+            if (config.PROXY_LOGIN && config.USE_PROXY){
                 const page = await this.browser.newPage()
                 await page.authenticate({ username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD });
                 await page.goto('https://2ip.ru');
@@ -80,16 +80,16 @@ class BrowserController {
             console.log("Мы авторизованы")
             this.faculties_data = faculties_data
             this.auth_cookie = {cookie: auth_cookie, time: Date.now()}
-            log.info("Произведена авторизация/получен список факультетов на schedule.ksu.kz")
+            log.info("Произведена авторизация/получен список факультетов на schedule.buketov.edu.kz")
         } catch (e) {
-            log.error("Не получилось авторизоваться на schedule.ksu.kz | " + e.message)
+            log.error("Не получилось авторизоваться на schedule.buketov.edu.kz | " + e.message)
         }
     }
 
     async authIfNot() {
         const page = await this.browser.newPage();
         try {
-            await page.goto("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read")
+            await page.goto("https://schedule.buketov.edu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read")
             await page.waitForSelector("header", {timeout: 2000})
 
             const elementExists = await page.evaluate(() => {
@@ -110,7 +110,7 @@ class BrowserController {
     // async isKsuAlive() {
     //     const page = await this.browser.newPage();
     //     try {
-    //         await page.goto("https://schedule.ksu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read", {timeout:3000})
+    //         await page.goto("https://schedule.buketov.edu.kz/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read", {timeout:3000})
     //         return true; // Возвращает true, если сайт доступен, иначе false
     //     } catch (e) {
     //         log.error("Ошибка при попытке пингануть ксу: " + e.message, e)

@@ -14,6 +14,7 @@ const config = {
     HTTP_PROXY:process.env.HTTP_PROXY,
     PROXY_LOGIN:process.env.PROXY_LOGIN,
     PROXY_PASSWORD:process.env.PROXY_PASSWORD,
+    USE_PROXY: process.env.USE_PROXY === "true"
 }
 
 export default config

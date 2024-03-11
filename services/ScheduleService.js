@@ -13,12 +13,15 @@ class ScheduleService {
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
         try {
-            await page.goto('https://schedule.ksu.kz/login.php', {waitUntil:"load"});
+            await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
             // Дождемся, когда загрузится содержимое сайта
             await page.waitForSelector('input', {timeout:3 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
+
+            await page.waitForNavigation({ waitUntil: 'load' });
+            await page.goto('https://schedule.buketov.edu.kz', {waitUntil:"domcontentloaded"});
 
             await page.waitForSelector("select")
             // Получаем список опций селекта
@@ -52,7 +55,7 @@ class ScheduleService {
     get_program_list_by_facultyId = async (browser, faculties_data, id) => {
         const page = await browser.newPage();
         try {
-            await page.goto("https://schedule.ksu.kz/")
+            await page.goto("https://schedule.buketov.edu.kz/")
 
             await page.select('select[name="Login"]', faculties_data[id].name);
             await page.click('input[type="submit"]')
@@ -89,7 +92,7 @@ class ScheduleService {
     get_group_list_by_programId = async (browser, id) => {
         const page = await browser.newPage();
         try {
-            await page.goto(`https://schedule.ksu.kz/grupps1.php?id=${id}`)
+            await page.goto(`https://schedule.buketov.edu.kz/grupps1.php?id=${id}`)
 
             await page.waitForSelector("table")
 
@@ -139,7 +142,7 @@ class ScheduleService {
 
         const page = await BrowserController.browser.newPage();
         try {
-            await page.goto(`https://schedule.ksu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:7000})
+            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
