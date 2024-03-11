@@ -45,7 +45,7 @@ class ScheduleService {
 
             return {faculties_data, auth_cookie}
         } catch (e) {
-            const path = `logs/error_${Date.now()}.png`
+            const path = `logs/error_auth_${Date.now()}.png`
             await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
@@ -267,8 +267,8 @@ class ScheduleService {
                 await sleep(1000);
                 return await this.get_schedule_by_groupId( id, language, ++attemption)
             } else {
-                // const path = `logs/error_${Date.now()}.png`
-                // await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
+                const path = `logs/error_studentSchedule_${Date.now()}.png`
+                await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
                 await page.close().catch(e => console.log(e))
                 throw new Error("Ошибка при получении студенческого расписания. Ошибку заскринил." + e.message)
             }
