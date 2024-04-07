@@ -1,5 +1,6 @@
 // import ConverterService from "../services/ConverterService.js";
 import {convertWordToHtmlAsync} from "../services/ConverterService/convertWordToHtmlAsync.js";
+import fs from "fs";
 import multer from "multer";
 import * as uuid from "uuid";
 import queue from 'async/queue.js';
@@ -22,6 +23,10 @@ const q = queue(async (taskData) => {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
+        const uploadFolder = 'uploads/';
+        if (!fs.existsSync(uploadFolder)) {
+            fs.mkdirSync(uploadFolder);
+        }
         cb(null, 'uploads/')
     },
     filename: (req, file, cb) => {
