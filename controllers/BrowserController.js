@@ -14,7 +14,7 @@ class BrowserController {
     faculties_data;
 
     constructor() {
-        if (!config.DEBUG || true){
+        if (!config.DEBUG && config.START_BROWSER){
             this.launchBrowser().then(() => log.info("Браузер запущен"))
         }
     }

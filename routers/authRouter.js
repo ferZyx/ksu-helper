@@ -4,7 +4,7 @@ import {body} from "express-validator"
 import authMiddleware from "../middlewares/authMiddleware.js";
 import roleMiddleware from "../middlewares/roleMiddleware.js";
 
-const authRouter = new Router()
+export const authRouter = new Router()
 
 authRouter.post('/registration', [
     body('username', "Имя пользователя не может быть пустым").notEmpty(),
@@ -18,4 +18,3 @@ authRouter.post('/refresh', UserController.refresh)
 
 authRouter.get('/isAdmin', authMiddleware, roleMiddleware(['Admin']), UserController.isAdmin)
 
-export default authRouter

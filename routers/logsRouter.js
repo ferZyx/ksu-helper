@@ -3,7 +3,7 @@ import {Router} from "express";
 import log from "../logging/logging.js";
 import LogService from "../services/LogService.js";
 
-const logsRouter = new Router()
+export const logsRouter = new Router()
 
 logsRouter.post('/add_log', async (req, res, next) => {
     try {
@@ -61,6 +61,3 @@ logsRouter.get("/get_logs", async (req,res, next) => {
     }
 
 })
-
-
-export default logsRouter
