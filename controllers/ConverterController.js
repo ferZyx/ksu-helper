@@ -58,10 +58,15 @@ export async function wordToHtml(req, res, next) {
                 fs.rmSync(req.file.path); // Удаляем исходный файл
                 const htmlPath = req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html');
                 const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
-                console.log(htmlPath)
-                console.log(htmlAbsolutePath)
 
-                res.sendFile(htmlAbsolutePath)
+                res.sendFile(htmlAbsolutePath, (err) => {
+                    if (err) {
+                        console.error('Ошибка отправки файла:', err);
+                        throw new Error('Ошибка отправки файла');
+                    } else {
+                        fs.rmSync(htmlAbsolutePath);
+                    }
+                });
             }
         });
 
