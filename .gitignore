@@ -6,3 +6,4 @@ temp
 logs.log
 logs
 error_logs.log
+uploads/*

@@ -6,7 +6,7 @@ import {body} from "express-validator"
 
 // const customRegex = /^[a-zA-Z0-9_\-\.]+$/;
 
-const groupRouter = new Router()
+export const groupRouter = new Router()
 
 
 groupRouter.post("",
@@ -35,5 +35,3 @@ groupRouter.post("/:group_id/accept_join_request",
     authMiddleware,
     body("requestAuthorId", "Поле requestAuthorId не должно быть пустым").notEmpty(),
     GroupController.accept_join_request)
-
-export default groupRouter
