@@ -1,4 +1,3 @@
-// import ConverterService from "../services/ConverterService.js";
 import {convertWordToHtmlAsync} from "../services/ConverterService/convertWordToHtmlAsync.js";
 import fs from "fs";
 import multer from "multer";
