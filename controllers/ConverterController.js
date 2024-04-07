@@ -61,7 +61,7 @@ export async function wordToHtml(req, res, next) {
                 console.log(htmlPath)
                 console.log(htmlAbsolutePath)
 
-                res.sendFile(htmlPath)
+                res.sendFile(htmlAbsolutePath)
             }
         });
 
