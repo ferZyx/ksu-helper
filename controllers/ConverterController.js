@@ -52,6 +52,7 @@ export async function wordToHtml(req, res, next) {
         q.push({
             file: req.file, callback: (err, result) => {
                 if (err) {
+                    console.log(err);
                     return res.status(500).json({error: 'Ошибка конвертации файла'});
                 }
                 fs.rmSync(req.file.path); // Удаляем исходный файл
