@@ -52,11 +52,16 @@ export async function wordToHtml(req, res, next) {
         q.push({
             file: req.file, callback: (err, result) => {
                 if (err) {
-                    console.log(err);
+                    console.log(err)
                     return res.status(500).json({error: 'Ошибка конвертации файла'});
                 }
                 fs.rmSync(req.file.path); // Удаляем исходный файл
-                res.sendFile(req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html'));
+                const htmlPath = req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html');
+                const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
+                console.log(htmlPath)
+                console.log(htmlAbsolutePath)
+
+                res.sendFile(htmlPath)
             }
         });
 
