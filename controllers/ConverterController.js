@@ -9,11 +9,8 @@ import queue from 'async/queue.js';
 const q = queue(async (taskData) => {
     const callback = taskData.callback;
     const file = taskData.file;
-    console.log(file)
     try {
-        console.log(1)
         await convertWordToHtmlAsync(file.path, 'uploads/converted/');
-        console.log(2)
         callback(null, `Успешно сконвертирован.`);
     } catch (error) {
         callback(error, null);
@@ -57,7 +54,8 @@ export async function wordToHtml(req, res, next) {
                 if (err) {
                     return res.status(500).json({error: 'Ошибка конвертации файла'});
                 }
-                res.json({message: result});
+                fs.rmSync(req.file.path); // Удаляем исходный файл
+                res.sendFile(req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html'));
             }
         });
 
