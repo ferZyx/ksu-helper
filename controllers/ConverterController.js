@@ -1,15 +1,19 @@
-import {convertWordToHtmlAsync} from "../services/ConverterService/convertWordToHtmlAsync.js";
 import fs from "fs";
 import multer from "multer";
 import * as uuid from "uuid";
 import queue from 'async/queue.js';
+import {wordToHtmlByLibreOffice} from "../services/ConverterService/wordToHtmlConverter.js";
 
 
 const q = queue(async (taskData) => {
     const callback = taskData.callback;
     const file = taskData.file;
     try {
-        await convertWordToHtmlAsync(file.path, 'uploads/converted/');
+        const startTime = new Date().getTime();
+        console.log('Начало конвертации...', startTime, 'ms.');
+        await wordToHtmlByLibreOffice(file.path, 'uploads/converted/');
+        const endTime = new Date().getTime();
+        console.log('Конвертация завершена.', endTime, 'ms.');
         callback(null, `Успешно сконвертирован.`);
     } catch (error) {
         callback(error, null);
@@ -48,6 +52,9 @@ export async function wordToHtml(req, res, next) {
             return res.status(400).json({error: 'Недопустимый формат файла'});
         }
 
+        const startTime = new Date().getTime();
+        console.log('Добавление задачи в очередь...', startTime, 'ms.');
+
         q.push({
             file: req.file, callback: (err, result) => {
                 if (err) {
@@ -58,6 +65,8 @@ export async function wordToHtml(req, res, next) {
                 const htmlPath = req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html');
                 const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
 
+                const endTime = new Date().getTime();
+                console.log('Задача выполнена.', endTime, 'ms.');
                 res.sendFile(htmlAbsolutePath, (err) => {
                     if (err) {
                         console.error('Ошибка отправки файла:', err);
