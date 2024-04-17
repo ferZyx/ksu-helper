@@ -90,11 +90,10 @@ class BrowserController {
         console.log(htmlCode)
         try {
             const screenshotBuffer = await BrowserService.getScreenshotBufferByHtml(htmlCode)
-
             res.setHeader('Content-Type', 'image/png');
             res.setHeader('Content-Length', screenshotBuffer.length);
 
-            res.end(screenshotBuffer);
+            res.send(screenshotBuffer);
         } catch (e) {
             next(e)
         }
