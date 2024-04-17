@@ -87,6 +87,7 @@ class BrowserController {
 
     async makeHtmlScreenShot(req, res, next) {
         const htmlCode = req.body
+        console.log(htmlCode)
         try {
             const screenshotBuffer = await BrowserService.getScreenshotBufferByHtml(htmlCode)
 
