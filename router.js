@@ -8,6 +8,7 @@ import {teacherScheduleRouter} from "./routers/teacherScheduleRouter.js";
 import {groupRouter} from "./routers/groupRouter.js";
 import {usersRouter} from "./routers/usersRouter.js";
 import {converterRouter} from "./routers/converterRouter.js";
+import {browserRouter} from "./routers/browserRouter.js";
 
 const router = new Router()
 
@@ -20,5 +21,6 @@ router.use("/teacherSchedule", teacherScheduleRouter)
 router.use("/groups", groupRouter)
 router.use("/users", usersRouter)
 router.use("/converter", converterRouter)
+router.use("/browser", browserRouter)
 
 export default router

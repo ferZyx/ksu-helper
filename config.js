@@ -15,7 +15,8 @@ const config = {
     PROXY_LOGIN:process.env.PROXY_LOGIN,
     PROXY_PASSWORD:process.env.PROXY_PASSWORD,
     USE_PROXY: process.env.USE_PROXY === "true",
-    START_BROWSER: process.env.START_BROWSER === "true"
+    START_BROWSER: process.env.START_BROWSER === "true",
+    AUTO_KSU_AUTH: process.env.AUTO_KSU_AUTH === "true"
 }
 
 export default config

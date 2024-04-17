@@ -8,6 +8,7 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import log from "./logging/logging.js";
 import {setupLoggingPathUpdate} from "./cron/loggingPathUpdate.js";
 import {setupKsuReAuth} from "./cron/ksuReAuth.js";
+import bodyParser from "body-parser";
 
 const app = express();
 
@@ -18,6 +19,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.text({ type: 'text/html' }));
 app.use((req, res, next) => {
     const decodedUrl = decodeURIComponent(req.url);
     log.info(`${req.method} ${decodedUrl}`);

@@ -3,6 +3,7 @@ import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
 import BrowserService from "../services/BrowserService.js";
+import fs from "fs";
 // import ping from "ping";
 // import ApiError from "../exceptions/apiError.js";
 // import axios from "axios";
@@ -14,7 +15,7 @@ class BrowserController {
     faculties_data;
 
     constructor() {
-        if (!config.DEBUG && config.START_BROWSER){
+        if (!config.DEBUG && config.START_BROWSER) {
             this.launchBrowser().then(() => log.info("Браузер запущен"))
         }
     }
@@ -39,18 +40,18 @@ class BrowserController {
             if (config.DEBUG) {
                 this.browser = await puppeteer.launch({
                     headless: false,
-                    args: ['--window-size=900,800', '--window-position=-10,0', ],
+                    args: ['--window-size=900,800', '--window-position=-10,0',],
                     ignoreHTTPSErrors: true,
                 })
             } else {
-                if (config.PROXY_LOGIN && config.USE_PROXY){
+                if (config.PROXY_LOGIN && config.USE_PROXY) {
                     this.browser = await puppeteer.launch({
                         headless: "new",
                         args: ["--no-sandbox", `--proxy-server=${config.HTTP_PROXY}`],
                         executablePath: '/usr/bin/google-chrome-stable',
                         ignoreHTTPSErrors: true,
                     })
-                }else{
+                } else {
                     this.browser = await puppeteer.launch({
                         headless: "new",
                         args: ["--no-sandbox"],
@@ -59,14 +60,16 @@ class BrowserController {
                     })
                 }
             }
-            if (config.PROXY_LOGIN && config.USE_PROXY){
+            if (config.PROXY_LOGIN && config.USE_PROXY) {
                 const page = await this.browser.newPage()
-                await page.authenticate({ username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD });
+                await page.authenticate({username: config.PROXY_LOGIN, password: config.PROXY_PASSWORD});
                 await page.goto('https://2ip.ru');
                 await page.close()
                 console.log("Прокси авторизован")
             }
-            await this.auth()
+            if (config.AUTO_KSU_AUTH) {
+                await this.auth()
+            }
         } catch (e) {
             throw new Error(e)
         }
@@ -77,6 +80,20 @@ class BrowserController {
         try {
             await BrowserService.restartBrowser()
             return res.json("Restarted")
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async makeHtmlScreenShot(req, res, next) {
+        const htmlCode = req.body
+        try {
+            const screenshotBuffer = await BrowserService.getScreenshotBufferByHtml(htmlCode)
+
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Content-Length', screenshotBuffer.length);
+
+            res.end(screenshotBuffer);
         } catch (e) {
             next(e)
         }
