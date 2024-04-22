@@ -105,9 +105,11 @@ class TeacherScheduleService {
             });
 
             if (isTableNotExists){
+                await sleep(10000)
+                log.info("teacher table not exists handler, attemption = " + attemption)
                 await page.close()
                 await BrowserController.auth()
-                return await this.get_teacher_schedule(id, attemption)
+                return await this.get_teacher_schedule(id, ++attemption)
             }
 
 
