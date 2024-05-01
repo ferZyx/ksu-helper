@@ -16,10 +16,13 @@ const corsOptions = {
     origin: '*',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
+
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({
+    limit: '50mb'
+}));
 app.use(cookieParser());
-app.use(bodyParser.text({ type: 'text/html' }));
+app.use(bodyParser.text({type: 'text/html', limit: '50mb'}));
 app.use((req, res, next) => {
     const decodedUrl = decodeURIComponent(req.url);
     log.info(`${req.method} ${decodedUrl}`);

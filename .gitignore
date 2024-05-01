@@ -6,5 +6,6 @@ temp
 logs.log
 logs
 error_logs.log
-uploads/*
+uploads
+gpt-input-pictures
 screenshot.png
