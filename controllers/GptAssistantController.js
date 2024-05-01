@@ -14,13 +14,12 @@ class GptAssistantController{
 
             const imgData = image.replace(/^data:image\/\w+;base64,/, "");
             const buffer = Buffer.from(imgData, 'base64');
-            const newFileName = uuidv4()
+            const newFileName = uuidv4() + ".png"
             fs.mkdirSync('gpt-input-pictures', {recursive: true})
-            fs.writeFileSync(`gpt-input-pictures/${newFileName}.png`, buffer, 'utf-8')
+            fs.writeFileSync(`gpt-input-pictures/${newFileName}`, buffer, 'utf-8')
 
-            return res.json({fileName: newFileName});
-            // const answer = await gptAssistantService.getAnswerByScreenshot(image, new);
-            // return res.json(answer);
+            const answer = await gptAssistantService.getAnswerByScreenshot(newFileName);
+            return res.json(answer);
         } catch (e) {
             log.error("Ошибка при получении ответа на скриншот: ", e)
             next(e)

@@ -3,7 +3,7 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 class GptAssistantService{
-    async getAnswerByScreenshot(image) {
+    async getAnswerByScreenshot(newFileName) {
         const response = await openai.chat.completions.create({
             model: "gpt-4-turbo",
             messages: [
@@ -17,7 +17,7 @@ class GptAssistantService{
                         {
                             type: "image_url",
                             image_url: {
-                                "url": `https://api.tolyan.me/`,
+                                "url": `https://api.tolyan.me/express/api/gpt-input-pictures/${newFileName}`,
                             },
                         },
                     ],
@@ -25,7 +25,7 @@ class GptAssistantService{
             ],
             max_tokens:30,
         });
-        return response
+        return response.choices[0]
 
     }
 }
