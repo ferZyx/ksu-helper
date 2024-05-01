@@ -18,6 +18,7 @@ class GptAssistantController{
             fs.mkdirSync('gpt-input-pictures', {recursive: true})
             fs.writeFileSync(`gpt-input-pictures/${newFileName}.png`, buffer, 'utf-8')
 
+            return res.json({fileName: newFileName});
             // const answer = await gptAssistantService.getAnswerByScreenshot(image, new);
             // return res.json(answer);
         } catch (e) {
