@@ -25,7 +25,7 @@ class GptAssistantService{
             ],
             max_tokens:30,
         });
-        return response.choices[0]
+        return response
 
     }
 }
