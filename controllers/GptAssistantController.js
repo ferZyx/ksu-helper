@@ -8,6 +8,7 @@ class GptAssistantController{
     async getAnswerByScreenshot(req, res, next) {
         try {
             const {image} = req.body;
+            console.log(image)
             if (!image) {
                 return next(ApiError.BadRequest("Необходимо передать скриншот"))
             }
