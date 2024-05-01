@@ -14,7 +14,7 @@ const app = express();
 
 const corsOptions = {
     origin: '*',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200
 }
 
 app.use(cors(corsOptions));
@@ -44,4 +44,4 @@ const appStart = async () => {
 
 appStart().then(() =>
     log.info(`App has been ran! http://localhost:${config.PORT}`)
-);
+).catch(e => console.log("Ошибка при запуске express приложения: " + e.stack))
