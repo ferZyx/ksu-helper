@@ -5,7 +5,7 @@ const openai = new OpenAI();
 class GptAssistantService{
     async getAnswerByScreenshot(newFileName) {
         const response = await openai.chat.completions.create({
-            model: "gpt-4-turbo",
+            model: "gpt-4o",
             messages: [
                 {
                     role: "user",
