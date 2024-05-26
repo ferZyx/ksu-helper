@@ -47,10 +47,11 @@ export async function wordToHtml(req, res, next) {
         if (fileExtension === '.doc') {
             convertWithLibreOffice(req, res, fileExtension)
         } else if (fileExtension === '.docx') {
-            convertWithPandoc(req, res, fileExtension).catch(e => {
-                console.log(e)
-                convertWithLibreOffice(req, res, fileExtension)
-            })
+            convertWithLibreOffice(req, res, fileExtension)
+            // convertWithPandoc(req, res, fileExtension).catch(e => {
+            //     console.log(e)
+            //     convertWithLibreOffice(req, res, fileExtension)
+            // })
         } else {
             return res.status(400).json({error: 'Недопустимый формат файла'});
         }
