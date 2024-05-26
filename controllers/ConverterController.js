@@ -54,12 +54,12 @@ export async function wordToHtml(req, res, next) {
 
             await wordToHtmlByPandoc(req.file.path, htmlAbsolutePath)
                 .then(() => {
-                    fs.rmSync(req.file.path) // Удаляем исходный docx файл
                     res.sendFile(htmlAbsolutePath, (err) => {
                         if (err) {
                             console.error('Ошибка отправки файла:', err);
                             throw new Error('Ошибка отправки файла');
                         } else {
+                            fs.rmSync(req.file.path) // Удаляем исходный docx файл
                             fs.rmSync(htmlAbsolutePath); // Удаляем полученный html файл
                         }
                     })
@@ -79,24 +79,26 @@ export async function wordToHtml(req, res, next) {
                             return res.status(500).json({error: 'Ошибка конвертации файла'});
                         }
 
-                        const htmlPath = req.file.path.replace('uploads/temp', 'uploads/converted').replace(fileExtension, '.html');
+                        const docxPath = req.file.path.replace('uploads', 'uploads/temp').replace(fileExtension, '.docx');
+
+                        const htmlPath = docxPath.replace('uploads/temp', 'uploads/converted').replace(fileExtension, '.html');
                         const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
 
-                        await wordToHtmlByPandoc(req.file.path, htmlAbsolutePath)
+                        await wordToHtmlByPandoc(docxPath, htmlAbsolutePath)
                             .then(() => {
-                                fs.rmSync(req.file.path) // Удаляем исходный docx файл
                                 res.sendFile(htmlAbsolutePath, (err) => {
                                     if (err) {
                                         console.error('Ошибка отправки файла:', err);
                                         throw new Error('Ошибка отправки файла');
                                     } else {
+                                        fs.rmSync(req.file.path) // Удаляем исходный docx файл
                                         fs.rmSync(htmlAbsolutePath); // Удаляем полученный html файл
                                     }
                                 })
                             })
                     }catch (e) {
                         console.log(e)
-                        throw new Error('Ошибка конвертации файла');
+                        return res.status(500).json({error: 'Ошибка конвертации файла doc'});
                     }
                 }
             })
