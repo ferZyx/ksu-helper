@@ -2,14 +2,14 @@ import fs from "fs";
 import multer from "multer";
 import * as uuid from "uuid";
 import queue from 'async/queue.js';
-import {wordToHtmlByLibreOffice, wordToHtmlByPandoc} from "../services/ConverterService/wordToHtmlConverter.js";
+import {docToDocxByLibreOffice, wordToHtmlByPandoc} from "../services/ConverterService/wordToHtmlConverter.js";
 
 
 const q = queue(async (taskData) => {
     const callback = taskData.callback;
     const file = taskData.file;
     try {
-        await wordToHtmlByLibreOffice(file.path, 'uploads/converted/');
+        await docToDocxByLibreOffice(file.path, 'uploads/temp/');
         callback(null, `Успешно сконвертирован.`);
     } catch (error) {
         callback(error, null);
@@ -22,8 +22,10 @@ const storage = multer.diskStorage({
         const uploadFolder = 'uploads/';
         if (!fs.existsSync(uploadFolder)) {
             fs.mkdirSync(uploadFolder);
+            fs.mkdirSync(uploadFolder + 'converted');
+            fs.mkdirSync(uploadFolder + 'temp');
         }
-        cb(null, 'uploads/')
+        cb(null, uploadFolder)
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -45,56 +47,59 @@ export async function wordToHtml(req, res, next) {
         const fileExtension = '.' + req.file.originalname.split('.').pop();
 
         if (fileExtension === '.doc') {
-            convertWithLibreOffice(req, res, fileExtension)
+            convertToDocxAndToHtmlByPandoc(req, res, fileExtension)
         } else if (fileExtension === '.docx') {
-            convertWithPandoc(req, res, fileExtension).catch(e => {
-                console.log(e)
-                convertWithLibreOffice(req, res, fileExtension)
-            })
-        } else {
-            return res.status(400).json({error: 'Недопустимый формат файла'});
-        }
-
-
-        function convertWithLibreOffice(req, res, fileExtension) {
-            q.push({
-                file: req.file, callback: (err, result) => {
-                    if (err) {
-                        console.log(err)
-                        return res.status(500).json({error: 'Ошибка конвертации файла'});
-                    }
-                    fs.rmSync(req.file.path); // Удаляем исходный файл
-                    const htmlPath = req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html');
-                    const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
-
-                    res.sendFile(htmlAbsolutePath, (err) => {
-                        if (err) {
-                            console.error('Ошибка отправки файла:', err);
-                            throw new Error('Ошибка отправки файла');
-                        } else {
-                            fs.rmSync(htmlAbsolutePath);
-                        }
-                    });
-                }
-            })
-        }
-
-        async function convertWithPandoc(req, res, fileExtension) {
             const htmlPath = req.file.path.replace('uploads', 'uploads/converted').replace(fileExtension, '.html');
             const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
 
             await wordToHtmlByPandoc(req.file.path, htmlAbsolutePath)
                 .then(() => {
-                    fs.rmSync(req.file.path)
+                    fs.rmSync(req.file.path) // Удаляем исходный docx файл
                     res.sendFile(htmlAbsolutePath, (err) => {
                         if (err) {
                             console.error('Ошибка отправки файла:', err);
                             throw new Error('Ошибка отправки файла');
                         } else {
-                            fs.rmSync(htmlAbsolutePath);
+                            fs.rmSync(htmlAbsolutePath); // Удаляем полученный html файл
                         }
                     })
                 })
+
+        } else {
+            return res.status(400).json({error: 'Недопустимый формат файла'});
+        }
+
+
+        function convertToDocxAndToHtmlByPandoc(req, res, fileExtension) {
+            q.push({
+                file: req.file, callback: async (err, result) => {
+                    try{
+                        if (err) {
+                            console.log(err)
+                            return res.status(500).json({error: 'Ошибка конвертации файла'});
+                        }
+
+                        const htmlPath = req.file.path.replace('uploads/temp', 'uploads/converted').replace(fileExtension, '.html');
+                        const htmlAbsolutePath = `${process.cwd()}/${htmlPath}`;
+
+                        await wordToHtmlByPandoc(req.file.path, htmlAbsolutePath)
+                            .then(() => {
+                                fs.rmSync(req.file.path) // Удаляем исходный docx файл
+                                res.sendFile(htmlAbsolutePath, (err) => {
+                                    if (err) {
+                                        console.error('Ошибка отправки файла:', err);
+                                        throw new Error('Ошибка отправки файла');
+                                    } else {
+                                        fs.rmSync(htmlAbsolutePath); // Удаляем полученный html файл
+                                    }
+                                })
+                            })
+                    }catch (e) {
+                        console.log(e)
+                        throw new Error('Ошибка конвертации файла');
+                    }
+                }
+            })
         }
     } catch (e) {
         next(e)

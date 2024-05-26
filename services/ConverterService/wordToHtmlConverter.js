@@ -1,29 +1,29 @@
 import { spawn } from "child_process";
 /*
 * wordToHtmlByLibreOffice
-* @param wordName - путь к файлу word
-* @param outdir - путь к директории, куда сохранить html
+* @param docName - путь к файлу doc
+* @param outdir - путь к директории, куда сохранить docx
 * @param args - дополнительные аргументы для libreoffice
 * @returns Promise<void>
 * */
-export async function wordToHtmlByLibreOffice(wordName, outdir, args = []) {
+export async function docToDocxByLibreOffice(docName, outdir, args = []) {
     return new Promise((resolve, reject) => {
-        const commandPrompt = ['--headless', '--convert-to', 'html:HTML:EmbedImages', wordName, '--outdir', outdir, ...args];
+        const commandPrompt = ['--headless', '--convert-to', 'docx', docName, '--outdir', outdir, ...args];
         let libreoffice = spawn("libreoffice", commandPrompt);
         libreoffice.stdout.on("data", (data) => {
             console.log('stdout:', data.toString());
         });
         libreoffice.on("error", (err) => {
-            console.error(`Ошибка конвертации файла ${wordName}. ` + err.stack);
+            console.error(`Ошибка конвертации файла ${docName}. ` + err.stack);
             reject(err);
         });
         libreoffice.on("exit", (code, signal) => {
             if (code !== 0) {
-                console.error(`Ошибка конвертации файла ${wordName}. Код: ${code} ${signal}`);
+                console.error(`Ошибка конвертации файла ${docName}. Код: ${code} ${signal}`);
                 reject(new Error('Ошибка конвертации файла. Код: ' + code + ' ' + signal));
             }
             else {
-                console.log(`Конвертация файла ${wordName} завершена успешно`);
+                console.log(`Конвертация файла ${docName} завершена успешно`);
                 resolve();
             }
         });
