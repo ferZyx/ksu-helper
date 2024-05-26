@@ -91,7 +91,8 @@ export async function wordToHtml(req, res, next) {
                                         console.error('Ошибка отправки файла:', err);
                                         throw new Error('Ошибка отправки файла');
                                     } else {
-                                        fs.rmSync(req.file.path) // Удаляем исходный docx файл
+                                        fs.rmSync(req.file.path) // Удаляем исходный doc файл
+                                        fs.rmSync(docxPath) // Удаляем полученный docx файл
                                         fs.rmSync(htmlAbsolutePath); // Удаляем полученный html файл
                                     }
                                 })
