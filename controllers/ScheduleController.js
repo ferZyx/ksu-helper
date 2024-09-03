@@ -21,7 +21,6 @@ class ScheduleController {
             log.error("Ошибка при получении списка факультетов: ", e)
             next(e)
         }
-
     }
 
     get_program_list_by_facultyId = async (req, res, next) => {

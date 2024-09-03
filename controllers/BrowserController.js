@@ -3,7 +3,6 @@ import puppeteer from "puppeteer";
 import ScheduleService from "../services/ScheduleService.js";
 import log from "../logging/logging.js";
 import BrowserService from "../services/BrowserService.js";
-import fs from "fs";
 // import ping from "ping";
 // import ApiError from "../exceptions/apiError.js";
 // import axios from "axios";
@@ -13,9 +12,11 @@ class BrowserController {
     browser;
     auth_cookie;
     faculties_data;
+    isAuthing;
 
     constructor() {
         if (config.START_BROWSER) {
+            this.isAuthing = true;
             this.launchBrowser().then(() => log.info("Браузер запущен"))
         }
     }
@@ -25,9 +26,9 @@ class BrowserController {
             if (!this.browser?.isConnected()) {
                 await this.launchBrowser();
             }
-            // if (!await this.isKsuAlive()) {
-            //     return next(ApiError.ServiceUnavailable("ksu.kz наелся и спит о_О"));
-            // }
+            if (await this.isAuthing) {
+                throw new Error("Не произведена авторизация")
+            }
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -103,6 +104,7 @@ class BrowserController {
         try {
             console.log("Начинаю авторизацию")
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
+            this.isAuthing = false;
             console.log("Мы авторизованы")
             this.faculties_data = faculties_data
             this.auth_cookie = {cookie: auth_cookie, time: Date.now()}
