@@ -103,6 +103,7 @@ class BrowserController {
     async auth() {
         try {
             console.log("Начинаю авторизацию")
+            this.isAuthing = true;
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
             this.isAuthing = false;
             console.log("Мы авторизованы")
