@@ -12,16 +12,20 @@ class ScheduleService {
 
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
+        const domain = 'https://schedule.buketov.edu.kz'
         try {
-            await page.goto('https://schedule.buketov.edu.kz/login.php', {waitUntil:"load"});
+            await page.goto(`${domain}/login.php`, {waitUntil: 'domcontentloaded'});
             // Дождемся, когда загрузится содержимое сайта
-            await page.waitForSelector('input', {timeout:10 * 1000});
+            await page.waitForSelector('input', {timeout: 10 * 1000});
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
-
-            await page.waitForNavigation({ waitUntil: 'load' });
-            await page.goto('https://schedule.buketov.edu.kz', {waitUntil:"domcontentloaded"});
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, 1000)
+            })
+            await page.goto(`${domain}`, {waitUntil: "domcontentloaded"});
 
             await page.waitForSelector("select")
             // Получаем список опций селекта
@@ -46,7 +50,10 @@ class ScheduleService {
             return {faculties_data, auth_cookie}
         } catch (e) {
             const path = `logs/error_auth_${Date.now()}.png`
-            await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
+            await page.screenshot({
+                path,
+                fullPage: true
+            }).catch(e => console.log("Не получилось заскринить ошибочку" + e.message));
             await page.close()
             throw new Error("Ошибка при авторизации. Ошибку заскринил" + e.message)
         }
@@ -128,7 +135,7 @@ class ScheduleService {
     }
 
     get_schedule_by_groupId = async (id, language, attemption = 1) => {
-        if(attemption > 2){
+        if (attemption > 2) {
             throw new Error("Ошибка при получении расписания. слишком много рекурсий")
         }
 
@@ -142,7 +149,7 @@ class ScheduleService {
 
         const page = await BrowserController.browser.newPage();
         try {
-            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout:7000})
+            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout: 7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
@@ -151,7 +158,7 @@ class ScheduleService {
                 return h1 ? h1.textContent.includes("Forbidden") : false
             });
 
-            if (isForbidden){
+            if (isForbidden) {
                 log.warn("(варн временный) Нас забанило, перезапускаю браузер!")
                 await BrowserService.restartBrowser()
                 return await this.get_schedule_by_groupId(id, language, ++attemption)
@@ -161,7 +168,7 @@ class ScheduleService {
                 return !document.querySelector('table');
             });
 
-            if (isTableNotExists){
+            if (isTableNotExists) {
                 await sleep(10000)
                 log.info("table not exists handler, attemption = " + attemption)
                 await page.close()
@@ -223,13 +230,13 @@ class ScheduleService {
 
                 const firstSubjectIndex = daily_subjects.findIndex(item => item.subject !== '');
                 let trimmedDailySubjects = []
-                if (firstSubjectIndex !== -1){
+                if (firstSubjectIndex !== -1) {
                     const lastSubjectIndex = daily_subjects.reverse().findIndex(item => item.subject !== '');
 
                     daily_subjects.reverse();
 
                     trimmedDailySubjects = daily_subjects.slice(firstSubjectIndex, daily_subjects.length - lastSubjectIndex);
-                }else{
+                } else {
                     trimmedDailySubjects = []
                 }
 
@@ -249,9 +256,9 @@ class ScheduleService {
                 schedule.push(daily_schedule)
             }
 
-            for (const daily_schedule of schedule){
-                for (const subject of daily_schedule.subjects){
-                    if (subject.subject === "\n"){
+            for (const daily_schedule of schedule) {
+                for (const subject of daily_schedule.subjects) {
+                    if (subject.subject === "\n") {
                         log.warn("[test] Вижу кривое расписание в ксу хелпере. Запускаю рестарт браузера. Group: " + id)
                         await BrowserService.restartBrowser()
                         log.warn("[test] Делаю рекурсию для получения расписания повторно. ")
@@ -265,10 +272,13 @@ class ScheduleService {
             if (attemption < 1) {
                 await page.close().catch(e => console.log(e))
                 await sleep(1000);
-                return await this.get_schedule_by_groupId( id, language, ++attemption)
+                return await this.get_schedule_by_groupId(id, language, ++attemption)
             } else {
                 const path = `logs/error_studentSchedule_${Date.now()}.png`
-                await page.screenshot({path, fullPage: true}).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
+                await page.screenshot({
+                    path,
+                    fullPage: true
+                }).catch(e => console.log("Не получиось заскринить ошибку( " + e.message))
                 await page.close().catch(e => console.log(e))
                 throw new Error("Ошибка при получении студенческого расписания. Ошибку заскринил." + e.message)
             }
