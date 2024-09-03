@@ -20,11 +20,9 @@ class ScheduleService {
             await page.type('input[name="login"]', config.KSU_LOGIN)
             await page.type('input[name="password"]', config.KSU_PASSWORD)
             await page.click('input[type="submit"]')
-            await new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve()
-                }, 1000)
-            })
+
+            await page.waitForTimeout(1000)
+
             await page.goto(`${domain}`, {waitUntil: "domcontentloaded"});
 
             await page.waitForSelector("select")
@@ -40,8 +38,7 @@ class ScheduleService {
             await page.select('select[name="Login"]', webFacultyList[0]);
             await page.click('input[type="submit"]')
 
-            await page.waitForTimeout(500)
-            await page.waitForSelector("header")
+            await page.waitForSelector("center center p")
             const cookies = await page.cookies()
             const auth_cookie = await cookies.find(cookie => cookie.name === "PHPSESSID");
 
@@ -149,7 +146,7 @@ class ScheduleService {
 
         const page = await BrowserController.browser.newPage();
         try {
-            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {timeout: 7000})
+            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {waitUntil: "domcontentloaded", timeout: 7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
