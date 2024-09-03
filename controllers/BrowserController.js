@@ -103,14 +103,16 @@ class BrowserController {
     async auth() {
         try {
             console.log("Начинаю авторизацию")
+            this.isAuthing = true;
             const {faculties_data, auth_cookie} = await ScheduleService.get_faculty_list(this.browser)
-            this.isAuthing = false;
             console.log("Мы авторизованы")
             this.faculties_data = faculties_data
             this.auth_cookie = {cookie: auth_cookie, time: Date.now()}
             log.info("Произведена авторизация/получен список факультетов на schedule.buketov.edu.kz")
         } catch (e) {
             log.error("Не получилось авторизоваться на schedule.buketov.edu.kz | " + e.message)
+        }finally {
+            this.isAuthing = false;
         }
     }
 
