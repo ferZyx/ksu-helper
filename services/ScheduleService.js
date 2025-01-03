@@ -12,7 +12,7 @@ class ScheduleService {
 
     get_faculty_list = async (browser) => {
         const page = await browser.newPage();
-        const domain = 'https://schedule.buketov.edu.kz'
+        const domain = `${config.KSU_DOMAIN}`
         try {
             await page.goto(`${domain}/login.php`, {waitUntil: 'domcontentloaded'});
             // Дождемся, когда загрузится содержимое сайта
@@ -59,7 +59,7 @@ class ScheduleService {
     get_program_list_by_facultyId = async (browser, faculties_data, id) => {
         const page = await browser.newPage();
         try {
-            await page.goto("https://schedule.buketov.edu.kz/")
+            await page.goto(`${config.KSU_DOMAIN}/`)
 
             await page.select('select[name="Login"]', faculties_data[id].name);
             await page.click('input[type="submit"]')
@@ -96,7 +96,7 @@ class ScheduleService {
     get_group_list_by_programId = async (browser, id) => {
         const page = await browser.newPage();
         try {
-            await page.goto(`https://schedule.buketov.edu.kz/grupps1.php?id=${id}`)
+            await page.goto(`${config.KSU_DOMAIN}/grupps1.php?id=${id}`)
 
             await page.waitForSelector("table")
 
@@ -146,7 +146,7 @@ class ScheduleService {
 
         const page = await BrowserController.browser.newPage();
         try {
-            await page.goto(`https://schedule.buketov.edu.kz/view1.php?id=${id}&Otdel=${language}`, {waitUntil: "domcontentloaded", timeout: 7000})
+            await page.goto(`${config.KSU_DOMAIN}/view1.php?id=${id}&Otdel=${language}`, {waitUntil: "domcontentloaded", timeout: 7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 

@@ -4,6 +4,7 @@ import HtmlService from "./HtmlService.js";
 import log from "../logging/logging.js";
 import {sleep} from "./ScheduleService.js";
 import BrowserService from "./BrowserService.js";
+import config from "../config.js";
 
 function getQueryParam(url, paramName) {
     const urlParts = url.split('?');
@@ -22,7 +23,7 @@ class TeacherScheduleService {
     async get_departments_list() {
         try {
             const page = await BrowserController.browser.newPage()
-            await page.goto("https://schedule.buketov.edu.kz/kafedra.php")
+            await page.goto(`https://${config.KSU_DOMAIN}/kafedra.php`)
 
             const linksSelector = 'table a';
 
@@ -50,7 +51,7 @@ class TeacherScheduleService {
 
     async get_teachers_list(departmentId) {
         const page = await BrowserController.browser.newPage()
-        await page.goto(`https://schedule.buketov.edu.kz/report_prep.php?d=1&IdKaf=${departmentId}`)
+        await page.goto(`${config.KSU_DOMAIN}/report_prep.php?d=1&IdKaf=${departmentId}`)
 
         const tableSelector = 'table'
 
@@ -85,7 +86,7 @@ class TeacherScheduleService {
     async get_teacher_schedule(id, attemption = 1) {
         const page = await BrowserController.browser.newPage()
         try {
-            await page.goto(`https://schedule.buketov.edu.kz/report_prep1.php?IdPrep=${id}`, {timeout:7000})
+            await page.goto(`${config.KSU_DOMAIN}/report_prep1.php?IdPrep=${id}`, {timeout:7000})
 
             await page.waitForSelector("body", {timeout: 2000})
 
