@@ -23,7 +23,7 @@ class TeacherScheduleService {
     async get_departments_list() {
         try {
             const page = await BrowserController.browser.newPage()
-            await page.goto(`https://${config.KSU_DOMAIN}/kafedra.php`)
+            await page.goto(`${config.KSU_DOMAIN}/kafedra.php`)
 
             const linksSelector = 'table a';
 
