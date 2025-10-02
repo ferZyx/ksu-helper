@@ -14,7 +14,10 @@ This is a Node.js Express API service that scrapes and provides schedule data fr
   - Manages browser lifecycle (launch, restart, connection checks)
   - Supports proxy configuration and headless/debug modes
   - Auto-authenticates on startup if `AUTO_KSU_AUTH=true`
-  - Middleware `allChecksCall` ensures browser is ready before requests
+  - **Memory Protection**: Middleware `allChecksCall` monitors open pages and triggers cleanup/restart at thresholds (10/20 pages)
+  - **Recovery Lock**: `isRecovering` flag prevents concurrent recovery attempts when KSU is unresponsive
+  - **Launch Lock**: `isLaunching` flag prevents concurrent browser launches - second request waits for first to finish
+  - **Request Blocking**: Blocks incoming requests during browser launch (`isLaunching`), authentication (`isAuthing`), and recovery (`isRecovering`) to prevent memory overload
 
 - **ScheduleService** (`services/ScheduleService.js`) - Core scraping logic
   - `get_faculty_list()` - Authenticates and extracts faculties
@@ -95,10 +98,17 @@ All schedule routes require browser to be ready via `BrowserController.allChecks
 
 ## Important Implementation Details
 
-### Browser Stability
+### Browser Stability & Memory Management
 - If KSU returns 403 or malformed data, the service restarts the browser and retries
 - Browser runs in headless mode in production (`executablePath: '/usr/bin/google-chrome-stable'`)
 - In DEBUG mode, browser runs with visible GUI for debugging
+- **Memory leak prevention**: All `page.newPage()` calls MUST be wrapped in try/finally with `page.close()` in finally block
+- **Recovery mechanism**:
+  - `authIfNot()` uses `isRecovering` lock to prevent concurrent recovery attempts
+  - Only ONE recovery attempt runs at a time, others are rejected immediately
+  - Auto-timeout after 60 seconds if recovery hangs
+  - Always runs re-auth even on errors to maximize recovery chances
+- **Request throttling**: Incoming requests are blocked during auth/recovery to prevent memory exhaustion
 
 ### Schedule Parsing
 - Schedule tables are scraped as HTML, converted to JSON via `HtmlService.htmlTableToJson()`

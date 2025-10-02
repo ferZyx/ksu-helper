@@ -13,8 +13,16 @@ class BrowserController {
     auth_cookie;
     faculties_data;
     isAuthing;
+    isRecovering; // Флаг для блокировки параллельных попыток восстановления
+    recoveryTimeout; // Таймер для автосброса флага восстановления
+    isLaunching; // Флаг для блокировки параллельных запусков браузера
+    launchTimeout; // Таймер для автосброса флага запуска
 
     constructor() {
+        this.isRecovering = false;
+        this.recoveryTimeout = null;
+        this.isLaunching = false;
+        this.launchTimeout = null;
         if (config.START_BROWSER) {
             this.isAuthing = true;
             this.launchBrowser().then(() => log.info("Браузер запущен"))
@@ -23,11 +31,22 @@ class BrowserController {
 
     allChecksCall = async (req, res, next) => {
         try {
+            // Блокируем входящие запросы если идёт запуск браузера
+            if (this.isLaunching) {
+                throw new Error("Идёт запуск браузера, попробуйте через несколько секунд")
+            }
+
             if (!this.browser?.isConnected()) {
                 await this.launchBrowser();
             }
-            if (await this.isAuthing) {
-                throw new Error("Не произведена авторизация")
+
+            // Блокируем входящие запросы если идёт авторизация или восстановление
+            if (this.isAuthing) {
+                throw new Error("Идёт авторизация в КСУ, попробуйте через несколько секунд")
+            }
+
+            if (this.isRecovering) {
+                throw new Error("Идёт восстановление соединения с КСУ, попробуйте через несколько секунд")
             }
 
             // Защита от утечки памяти - проверяем количество открытых страниц
@@ -76,6 +95,34 @@ class BrowserController {
     }
 
     async launchBrowser() {
+        // Если браузер уже запускается - ждём его запуска, не создаём новый
+        if (this.isLaunching) {
+            log.info("[Launch Lock] Браузер уже запускается, жду завершения...");
+            // Ждём максимум 30 секунд пока запустится
+            for (let i = 0; i < 60; i++) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (!this.isLaunching && this.browser?.isConnected()) {
+                    log.info("[Launch Lock] Браузер запустился, продолжаю работу");
+                    return;
+                }
+            }
+            throw new Error("Таймаут ожидания запуска браузера (30 сек)");
+        }
+
+        this.isLaunching = true;
+        log.info("[Launch Start] Начинаю запуск браузера");
+
+        // Защита от зависания - если через 45 секунд флаг не сброшен, сбрасываем принудительно
+        if (this.launchTimeout) {
+            clearTimeout(this.launchTimeout);
+        }
+        this.launchTimeout = setTimeout(() => {
+            if (this.isLaunching) {
+                log.error("[Launch Timeout] Запуск браузера зависло больше 45 секунд, принудительно сбрасываю флаг!");
+                this.isLaunching = false;
+            }
+        }, 45000);
+
         try {
             if (config.DEBUG) {
                 this.browser = await puppeteer.launch({
@@ -110,8 +157,17 @@ class BrowserController {
             if (config.AUTO_KSU_AUTH) {
                 await this.auth()
             }
+            log.info("[Launch Success] Браузер успешно запущен");
         } catch (e) {
+            log.error("[Launch Error] Ошибка при запуске браузера: " + e.message);
             throw new Error(e)
+        } finally {
+            if (this.launchTimeout) {
+                clearTimeout(this.launchTimeout);
+                this.launchTimeout = null;
+            }
+            this.isLaunching = false;
+            log.info("[Launch End] Завершил процесс запуска браузера");
         }
     }
 
@@ -156,9 +212,30 @@ class BrowserController {
     }
 
     async authIfNot() {
-        const page = await this.browser.newPage();
+        // Если уже идёт восстановление - выходим, не создаём лишних страниц
+        if (this.isRecovering) {
+            log.info("[Recovery Lock] Восстановление уже идёт, пропускаю authIfNot");
+            return;
+        }
+
+        this.isRecovering = true;
+        log.info("[Recovery Start] Начинаю проверку авторизации и восстановление");
+
+        // Защита от зависания - если через 60 секунд флаг не сброшен, сбрасываем принудительно
+        if (this.recoveryTimeout) {
+            clearTimeout(this.recoveryTimeout);
+        }
+        this.recoveryTimeout = setTimeout(() => {
+            if (this.isRecovering) {
+                log.error("[Recovery Timeout] Восстановление зависло больше 60 секунд, принудительно сбрасываю флаг!");
+                this.isRecovering = false;
+            }
+        }, 60000);
+
+        let page = null;
         try {
-            await page.goto(`${config.KSU_DOMAIN}/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read`)
+            page = await this.browser.newPage();
+            await page.goto(`${config.KSU_DOMAIN}/view1.php?id=5044&Kurs=3&Otdel=рус&Stud=10&d=1&m=Read`, {timeout: 10000})
             await page.waitForSelector("header", {timeout: 2000})
 
             const elementExists = await page.evaluate(() => {
@@ -166,12 +243,30 @@ class BrowserController {
             });
 
             if (!elementExists) {
+                log.warn("[Recovery] Таблица не найдена, запускаю полную авторизацию");
                 await this.auth()
+            } else {
+                log.info("[Recovery] Проверка прошла успешно, авторизация не требуется");
             }
         } catch (e) {
-            log.error("Ошибка при попытке проверить авторизован или нет. " + e.message, {stack: e.stack})
+            log.error("[Recovery Error] Ошибка при попытке проверить авторизацию: " + e.message, {stack: e.stack})
+            // Даже при ошибке пытаемся переавторизоваться
+            try {
+                log.warn("[Recovery Fallback] Запускаю авторизацию после ошибки проверки");
+                await this.auth()
+            } catch (authError) {
+                log.error("[Recovery Fatal] Не удалось восстановить авторизацию: " + authError.message)
+            }
         } finally {
-            await page.close().catch(e => log.error("Ошибка при закрытии страницы в authIfNot: " + e.message))
+            if (page) {
+                await page.close().catch(e => log.error("Ошибка при закрытии страницы в authIfNot: " + e.message))
+            }
+            if (this.recoveryTimeout) {
+                clearTimeout(this.recoveryTimeout);
+                this.recoveryTimeout = null;
+            }
+            this.isRecovering = false;
+            log.info("[Recovery End] Завершил попытку восстановления");
         }
 
     }
