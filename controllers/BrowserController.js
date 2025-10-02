@@ -29,6 +29,45 @@ class BrowserController {
             if (await this.isAuthing) {
                 throw new Error("Не произведена авторизация")
             }
+
+            // Защита от утечки памяти - проверяем количество открытых страниц
+            const pages = await this.browser.pages();
+            const openPagesCount = pages.length;
+
+            log.info(`[Memory Check] Открыто страниц: ${openPagesCount}`);
+
+            // Если открыто более 20 страниц - закрываем все кроме первой и перезапускаем браузер
+            if (openPagesCount > 20) {
+                log.warn(`[Memory Protection] Обнаружено ${openPagesCount} открытых страниц! Закрываю все и перезапускаю браузер.`);
+
+                // Закрываем все страницы кроме первой (about:blank)
+                for (let i = 1; i < pages.length; i++) {
+                    try {
+                        await pages[i].close();
+                    } catch (e) {
+                        log.error(`Ошибка при закрытии страницы ${i}: ${e.message}`);
+                    }
+                }
+
+                // Перезапускаем браузер для гарантии очистки памяти
+                await this.browser?.close().catch(e => log.error("Ошибка при закрытии браузера: " + e.message));
+                await this.launchBrowser();
+
+                throw new Error("Браузер был перезапущен из-за утечки памяти. Попробуйте запрос снова.");
+            }
+
+            // Дополнительная проверка - если открыто 10-20 страниц, закрываем лишние
+            if (openPagesCount > 10) {
+                log.warn(`[Memory Warning] Открыто ${openPagesCount} страниц. Закрываю лишние.`);
+                for (let i = 1; i < pages.length; i++) {
+                    try {
+                        await pages[i].close();
+                    } catch (e) {
+                        log.error(`Ошибка при закрытии страницы ${i}: ${e.message}`);
+                    }
+                }
+            }
+
             next();
         } catch (e) {
             log.error("Ошибка в allChecksCall мидлваре(" + e.message, e)
@@ -125,14 +164,14 @@ class BrowserController {
             const elementExists = await page.evaluate(() => {
                 return !!document.querySelector('table');
             });
-            await page.close()
 
             if (!elementExists) {
                 await this.auth()
             }
         } catch (e) {
-            await page.close()
             log.error("Ошибка при попытке проверить авторизован или нет. " + e.message, {stack: e.stack})
+        } finally {
+            await page.close().catch(e => log.error("Ошибка при закрытии страницы в authIfNot: " + e.message))
         }
 
     }

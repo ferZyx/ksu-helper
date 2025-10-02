@@ -21,8 +21,8 @@ function getQueryParam(url, paramName) {
 
 class TeacherScheduleService {
     async get_departments_list() {
+        const page = await BrowserController.browser.newPage()
         try {
-            const page = await BrowserController.browser.newPage()
             await page.goto(`${config.KSU_DOMAIN}/kafedra.php`)
 
             const linksSelector = 'table a';
@@ -45,42 +45,48 @@ class TeacherScheduleService {
 
             return linkObjects
         } catch (e) {
+            await page.close().catch(err => log.error("Ошибка при закрытии страницы в get_departments_list: " + err.message))
             throw e
         }
     }
 
     async get_teachers_list(departmentId) {
         const page = await BrowserController.browser.newPage()
-        await page.goto(`${config.KSU_DOMAIN}/report_prep.php?d=1&IdKaf=${departmentId}`)
+        try {
+            await page.goto(`${config.KSU_DOMAIN}/report_prep.php?d=1&IdKaf=${departmentId}`)
 
-        const tableSelector = 'table'
+            const tableSelector = 'table'
 
-        await page.waitForSelector(tableSelector)
-        const tables = await page.$$(tableSelector);
+            await page.waitForSelector(tableSelector)
+            const tables = await page.$$(tableSelector);
 
-        const secondTable = tables[1];
+            const secondTable = tables[1];
 
-        if (!secondTable) {
-            throw ApiError.ServiceUnavailable("Не получилось получить вторую табличку на странице кафдеры. в ней хранится список преподов")
-        }
-
-        const links = await secondTable.$$('a');
-
-        const linkObjects = [];
-
-        for (const link of links) {
-            const name = await (await link.getProperty('textContent')).jsonValue();
-            const href = await (await link.getProperty('href')).jsonValue();
-            const id = await getQueryParam(href, 'IdPrep')
-            if (name === '- ') {
-                continue
+            if (!secondTable) {
+                throw ApiError.ServiceUnavailable("Не получилось получить вторую табличку на странице кафдеры. в ней хранится список преподов")
             }
-            linkObjects.push({name, href, id, departmentId})
+
+            const links = await secondTable.$$('a');
+
+            const linkObjects = [];
+
+            for (const link of links) {
+                const name = await (await link.getProperty('textContent')).jsonValue();
+                const href = await (await link.getProperty('href')).jsonValue();
+                const id = await getQueryParam(href, 'IdPrep')
+                if (name === '- ') {
+                    continue
+                }
+                linkObjects.push({name, href, id, departmentId})
+            }
+
+            await page.close()
+
+            return linkObjects
+        } catch (e) {
+            await page.close().catch(err => log.error("Ошибка при закрытии страницы в get_teachers_list: " + err.message))
+            throw e
         }
-
-        await page.close()
-
-        return linkObjects
     }
 
     async get_teacher_schedule(id, attemption = 1) {
